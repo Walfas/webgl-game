@@ -1,0 +1,19 @@
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>Graphics</title>
+	<script>
+	window.fillCanvas = function() {
+		var canvas = document.getElementById("webgl-canvas");
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+	}
+	</script>
+	<link rel="stylesheet" href="css/style.css" type="text/css">
+	<script data-main="js/main" src="js/lib/require/require.js"></script>
+
+	<body onload="fillCanvas();" onresize="fillCanvas()">
+		<canvas id="webgl-canvas" style="border: none;" width="800" height="600"></canvas>
+	</body>
+</head>
+</html>
