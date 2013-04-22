@@ -22,8 +22,12 @@ define(["gl", "glmatrix", "util", "text!shaders/vertex.shader", "text!shaders/fr
 		data.attribLocation = gl.getAttribLocation(program, "aPosition");
 		gl.enableVertexAttribArray(data.attribLocation);
 
+		data.textureLocation = gl.getAttribLocation(program, "aTexture");
+		gl.enableVertexAttribArray(data.textureLocation);
+
 		data.uPMatrix = gl.getUniformLocation(data.program, "uPMatrix");
 		data.uMVMatrix = gl.getUniformLocation(data.program, "uMVMatrix");
+		data.uSampler = gl.getUniformLocation(data.program, "uSampler");
 
 		gl.enable(gl.DEPTH_TEST);
 		return data;

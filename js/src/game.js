@@ -1,27 +1,32 @@
 require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"], 
 	function(canvas, gl, glmat, data, texture, terrain, input) {
 
-		this.ta = new texture.TextureAtlas("img/texture.png", 16);
-		this.t = null;
+		this.ta = new texture.TextureAtlas("img/texture.png", 8);
+		this.terrain = null;
 		
 		checkLoaded();
 		function checkLoaded() {
 			if (this.ta.texture) {
-				this.ta.getST(0);
-				this.t = new terrain.Terrain(ta);
-				this.t.generate([
+				this.terrain = new terrain.Terrain(ta);
+
+				this.terrain.generate([
 					[
-						[1,0,1],
 						[0,0,0],
-						[1,0,1]
+						[0,1,0],
+						[0,0,0]
+					],
+					[
+						[0,1,0],
+						[1,1,1],
+						[0,1,0]
 					],
 					[
 						[0,0,0],
 						[0,1,0],
 						[0,0,0]
-					]
+					],
 				]);
-				this.t.debug();
+				this.terrain.debug();
 				tick();
 			}
 			else 
@@ -42,9 +47,18 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			gl.clearColor.apply(this,data.background);
 			gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.t.vertexObject);
+			// Bind buffers
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.terrain.vertexObject);
 			gl.vertexAttribPointer(data.attribLocation, 3, gl.FLOAT, false, 0, 0);
-			gl.drawArrays(gl.TRIANGLES, 0, this.t.numVertices());
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.terrain.texCoordObject);
+			gl.vertexAttribPointer(data.textureLocation, 2, gl.FLOAT, false, 0, 0);
+
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D, this.terrain.textureAtlas.texture);
+			gl.uniform1i(data.uSampler, 0);
+
+			gl.drawArrays(gl.TRIANGLES, 0, this.terrain.numVertices());
 		}
 
 		function tick() {
