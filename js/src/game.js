@@ -1,7 +1,7 @@
 require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"], 
 	function(canvas, gl, glmat, data, texture, terrain, input) {
 
-		this.ta = new texture.TextureAtlas("img/texture.png", 8);
+		this.ta = new texture.TextureAtlas("img/jolicraft.png", 16);
 		this.terrain = null;
 		
 		checkLoaded();
@@ -11,22 +11,21 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 
 				this.terrain.generate([
 					[
+						[3,0,5],
 						[0,0,0],
-						[0,1,0],
-						[0,0,0]
+						[8,0,20]
 					],
 					[
-						[0,1,0],
-						[1,1,1],
-						[0,1,0]
+						[0,44,0],
+						[43,0,46],
+						[0,69,0]
 					],
 					[
-						[0,0,0],
-						[0,1,0],
-						[0,0,0]
+						[74,0,77],
+						[0,102,0],
+						[108,0,121]
 					],
 				]);
-				this.terrain.debug();
 				tick();
 			}
 			else 
@@ -38,7 +37,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			gl.viewport(0, 0, canvas.width, canvas.height);
 			glmat.mat4.perspective(data.pMatrix, 45.0, canvas.width/canvas.height, 0.1, 100.0);
 
-			glmat.mat4.rotateX(data.mvMatrix, data.mvMatrix, .01);
+			//glmat.mat4.rotateX(data.mvMatrix, data.mvMatrix, .01);
 			glmat.mat4.rotateY(data.mvMatrix, data.mvMatrix, .01);
 
 			gl.uniformMatrix4fv(data.uMVMatrix, false, data.mvMatrix);

@@ -11,12 +11,6 @@ define(["gl","texture"], function(gl,texture) {
 
 			this.numVertices = function() { return this.vertices.length/3; };
 			
-			this.debug = function() {
-				console.log(JSON.stringify(this.vertices));
-				console.log(JSON.stringify(this.normals));
-				console.log(JSON.stringify(this.texCoords));
-			}
-
 			this.generate = function(world) {
 				// Test for hidden faces and add blocks
 				for (var z=0; z<world.length; z++) {
@@ -64,7 +58,6 @@ define(["gl","texture"], function(gl,texture) {
 					or not the corresponding face will be shown
 			*/
 			this.addBlock = function(tileNum, pos, faces) {
-				var st = this.textureAtlas.getST(tileNum);
 				/*   6-------5
 				    /|      /|
 				   1-------0 |
@@ -114,7 +107,7 @@ define(["gl","texture"], function(gl,texture) {
 						continue;
 					this.addFaceVertices(c, indices[f]);
 					this.addFaceNormals(n[f]);
-					this.addFaceTexCoords(st);
+					this.addFaceTexCoords(tileNum,f);
 				}
 			}
 
@@ -128,7 +121,20 @@ define(["gl","texture"], function(gl,texture) {
 					this.normals = this.normals.concat(newNormal);
 			}
 
-			this.addFaceTexCoords = function(st) {
+			this.addFaceTexCoords = function(tileNum,faceNum) {
+				if (this.specialTiles.hasOwnProperty(tileNum)) {
+					var specialTile = this.specialTiles[tileNum];
+					if (!Array.isArray(specialTile))
+						tileNum = specialTile; // Reference to different tile
+					switch(faceNum) {
+					case 2: tileNum = specialTile[3]; break; // under
+					case 3: tileNum = specialTile[2]; break; // top
+					case 5: tileNum = specialTile[0]; break; // front
+					default: tileNum = specialTile[1]; break; // side
+					}
+				}
+				var st = this.textureAtlas.getST(tileNum);
+
 				this.texCoords = this.texCoords.concat(
 					st[2], st[1], 
 					st[0], st[1], 
@@ -138,6 +144,36 @@ define(["gl","texture"], function(gl,texture) {
 					st[2], st[3]
 				);
 			}
+
+			this.specialTiles = {
+				// [front,side,top,under]
+				3: [3,3,0,2], // grass
+				5: [5,5,6,6], 6: 5, // slab
+				8: [8,8,9,10], 9: 8, 10: 8, // TNT
+				20: [20,20,21,21], 21: 20, // wood oak
+				43: [59,60,43,43], 59: 43, 60: 43, // workbench
+				44: [44,45,62,62], 45: 44, 62: 44, // furnace unlit
+				46: [46,45,62,62], // dispenser
+				69: [70,70,69,71], 70: 69, 71: 69, // cactus
+				74: [74,74,75,75], 75: 74, // jukebox
+				77: [77,77,78,2], 78: 77, // mycelium
+				// 82,98: wood door
+				// 83,99: iron door
+				102: [119,118,102,102], // pumpkin
+				120: [120,118,102,102], 118: 102, 119: 102, // jack-o-lantern
+				108: [110,108,109,109], 109: 108, 110: 108, // piston
+				116: [20,20,116,116], // wood pine
+				117: [20,20,117,117], // wood birch
+				121: [122,122,121,124], 122: 121, 124: 121, // cake
+				123: 121, // cake inside
+				// 125,126: mushroom top
+				// 134,135,149,150,151,152: bed 
+				136: [136,136,137,137], 137: 136, // melon
+				138: [154,154,138,155], 154: 138, 155: 138, // cauldron
+				158: [159,159,158,175], 159: 158,  // end portal
+				166: [182,182,166,183], 182: 166, 183: 166, // enchant table
+				176: [192,192,176,208], 192: 176, 208: 176 // sandstone
+			};
 		},
 
 	}

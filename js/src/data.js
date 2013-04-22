@@ -30,6 +30,8 @@ define(["gl", "glmatrix", "util", "text!shaders/vertex.shader", "text!shaders/fr
 		data.uSampler = gl.getUniformLocation(data.program, "uSampler");
 
 		gl.enable(gl.DEPTH_TEST);
+		gl.enable(gl.CULL_FACE);
+		gl.cullFace(gl.BACK);
 		return data;
 	}
 );
