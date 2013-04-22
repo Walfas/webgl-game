@@ -9,12 +9,52 @@ define(["gl","texture"], function(gl,texture) {
 			this.normalObject = gl.createBuffer();
 			this.texCoordObject = gl.createBuffer();
 
-			this.numVertices = function() { return this.vertices.length; };
+			this.numVertices = function() { return this.vertices.length/3; };
 			
 			this.debug = function() {
 				console.log(JSON.stringify(this.vertices));
 				console.log(JSON.stringify(this.normals));
 				console.log(JSON.stringify(this.texCoords));
+			}
+
+			this.generate = function(world) {
+				// Test for hidden faces and add blocks
+				for (var z=0; z<world.length; z++) {
+					for (var y=0; y<world[z].length; y++) {
+						for (var x=0; x<world[z][y].length; x++) {
+							if (world[z][y][x] == 0)
+								continue;
+							var showFace = [true, true, true, true, true, true];
+							if (x > 0)
+								showFace[0] = !world[z][y][x-1];
+							if (x < world[z][y].length-1)
+								showFace[1] = !world[z][y][x+1];
+							if (y > 0)
+								showFace[2] = !world[z][y-1][x];
+							if (y < world[z].length-1)
+								showFace[3] = !world[z][y+1][x];
+							if (z > 0)
+								showFace[4] = !world[z-1][y][x];
+							if (z < world.length-1)
+								showFace[5] = !world[z+1][y][x];
+
+							this.addBlock(world[z][y][x], [x,y,z], showFace);
+						}
+					}
+				}
+
+				// Initialize buffer data
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexObject);
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.normalObject);
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.normals), gl.STATIC_DRAW);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordObject);
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.texCoords), gl.STATIC_DRAW);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
 			}
 
 			/** Add block to terrain (modifies vertices, normals, texCoords) 
