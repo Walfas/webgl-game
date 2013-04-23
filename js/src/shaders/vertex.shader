@@ -11,8 +11,8 @@ varying vec3 vTransformedNormal;
 varying vec4 vPosition;
 
 void main(void) {
-	vPosition = uMVMatrix * vec4(aPosition + vec3(-1.5,-1.5,-1.5), 1.0);
-	vPosition += vec4(0,0,-5,0);
+	vPosition = uMVMatrix * vec4(aPosition + vec3(-8,-8,-8), 1.0);
+	vPosition += vec4(0,0,-16,0);
 	gl_Position = uPMatrix * vPosition;
 	vTexture = aTexture;
 	vTransformedNormal = uNMatrix * aNormal;

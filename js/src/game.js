@@ -9,23 +9,23 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			if (this.ta.texture) {
 				this.terrain = new terrain.Terrain(ta);
 
-				this.terrain.generate([
-					[
-						[3,0,5],
-						[0,116,0],
-						[8,0,20]
-					],
-					[
-						[0,44,0],
-						[158,0,46],
-						[0,69,0]
-					],
-					[
-						[74,0,77],
-						[0,102,0],
-						[108,0,166]
-					],
-				]);
+				//DEBUG
+				var land = [[[]]];
+				for (var z=0; z<16; z++) {
+					land[z] = [];
+					for (var y=0; y<16; y++) {
+						land[z][y] = [];
+						for (var x=0; x<16; x++) {
+							if(Math.random() > 0.05) {
+								land[z][y][x] = 0;
+								continue;
+							}
+							land[z][y][x] = Math.floor(Math.random()*256);
+						}
+					}
+				}
+
+				this.terrain.generate(land);
 				tick();
 			}
 			else 
@@ -45,9 +45,9 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			gl.uniformMatrix3fv(data.uNMatrix, false, data.nMatrix);
 
 			// DEBUG
-			gl.uniform3fv(data.uAmbientColor, [.2,.2,.2]);
-			gl.uniform3fv(data.uPointLightingLocation, [5,0,5]);
-			gl.uniform3fv(data.uPointLightingColor, [1,1,1]);
+			gl.uniform3fv(data.uAmbientColor, [.2,.2,.4]);
+			gl.uniform3fv(data.uPointLightingLocation, [100,100,100]);
+			gl.uniform3fv(data.uPointLightingColor, [.8,.4,.4]);
 
 			gl.clearColor.apply(this,data.background);
 			gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
