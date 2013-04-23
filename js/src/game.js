@@ -12,18 +12,18 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 				this.terrain.generate([
 					[
 						[3,0,5],
-						[0,0,0],
+						[0,116,0],
 						[8,0,20]
 					],
 					[
 						[0,44,0],
-						[43,0,46],
+						[158,0,46],
 						[0,69,0]
 					],
 					[
 						[74,0,77],
 						[0,102,0],
-						[108,0,121]
+						[108,0,166]
 					],
 				]);
 				tick();
@@ -42,16 +42,25 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 
 			gl.uniformMatrix4fv(data.uMVMatrix, false, data.mvMatrix);
 			gl.uniformMatrix4fv(data.uPMatrix, false, data.pMatrix);
+			gl.uniformMatrix3fv(data.uNMatrix, false, data.nMatrix);
+
+			// DEBUG
+			gl.uniform3fv(data.uAmbientColor, [.2,.2,.2]);
+			gl.uniform3fv(data.uPointLightingLocation, [5,0,5]);
+			gl.uniform3fv(data.uPointLightingColor, [1,1,1]);
 
 			gl.clearColor.apply(this,data.background);
 			gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
 			// Bind buffers
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.terrain.vertexObject);
-			gl.vertexAttribPointer(data.attribLocation, 3, gl.FLOAT, false, 0, 0);
+			gl.vertexAttribPointer(data.aPosition, 3, gl.FLOAT, false, 0, 0);
 
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.terrain.texCoordObject);
-			gl.vertexAttribPointer(data.textureLocation, 2, gl.FLOAT, false, 0, 0);
+			gl.vertexAttribPointer(data.aTexture, 2, gl.FLOAT, false, 0, 0);
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.terrain.normalObject);
+			gl.vertexAttribPointer(data.aNormal, 3, gl.FLOAT, false, 0, 0);
 
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, this.terrain.textureAtlas.texture);
