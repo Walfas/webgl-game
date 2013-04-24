@@ -5,11 +5,14 @@ define(["gl","texture"], function(gl,texture) {
 			this.vertices = [];
 			this.normals = [];
 			this.texCoords = [];
+			this.indices = [];
+			this.baseIndex = 0;
 			this.vertexObject = gl.createBuffer();
 			this.normalObject = gl.createBuffer();
 			this.texCoordObject = gl.createBuffer();
+			this.indexObject = gl.createBuffer();
 
-			this.numVertices = function() { return this.vertices.length/3; };
+			this.numVertices = function() { return this.indices.length; };
 			
 			this.generate = function(world) {
 				// Test for hidden faces and add blocks
@@ -46,6 +49,9 @@ define(["gl","texture"], function(gl,texture) {
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordObject);
 				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.texCoords), gl.STATIC_DRAW);
+
+				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexObject);
+				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
@@ -94,12 +100,12 @@ define(["gl","texture"], function(gl,texture) {
 
 				// Indices for vertices
 				var indices = [
-					[1, 6, 7,	1, 7, 2],
-					[5, 0, 3,	5, 3, 4],
-					[3, 2, 7,	3, 7, 4],
-					[5, 6, 1,	5, 1, 0],
-					[6, 5, 4,	6, 4, 7],
-					[0, 1, 2,	0, 2, 3]
+					[1, 6, 7, 2],
+					[5, 0, 3, 4],
+					[3, 2, 7, 4],
+					[5, 6, 1, 0],
+					[6, 5, 4, 7],
+					[0, 1, 2, 3]
 				];
 				
 				for (var f=0; f<6; f++) {
@@ -114,10 +120,15 @@ define(["gl","texture"], function(gl,texture) {
 			this.addFaceVertices = function(cube,indices) {
 				for (var i=0; i<indices.length; i++)
 					this.vertices = this.vertices.concat(cube[indices[i]]);
+				this.indices.push(
+					this.baseIndex, this.baseIndex+1, this.baseIndex+2,
+					this.baseIndex, this.baseIndex+2, this.baseIndex+3
+				);
+				this.baseIndex += 4;
 			}
 
 			this.addFaceNormals = function(newNormal) {
-				for (var i=0; i<6; i++) 
+				for (var i=0; i<4; i++) 
 					this.normals = this.normals.concat(newNormal);
 			}
 
@@ -138,8 +149,6 @@ define(["gl","texture"], function(gl,texture) {
 				this.texCoords = this.texCoords.concat(
 					st[2], st[1], 
 					st[0], st[1], 
-					st[0], st[3],
-					st[2], st[1], 
 					st[0], st[3],
 					st[2], st[3]
 				);

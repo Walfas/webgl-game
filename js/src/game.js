@@ -66,7 +66,8 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			gl.bindTexture(gl.TEXTURE_2D, this.terrain.textureAtlas.texture);
 			gl.uniform1i(data.uSampler, 0);
 
-			gl.drawArrays(gl.TRIANGLES, 0, this.terrain.numVertices());
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.terrain.indexObject);
+			gl.drawElements(gl.TRIANGLES, this.terrain.numVertices(), gl.UNSIGNED_SHORT, 0);
 		}
 
 		function tick() {
