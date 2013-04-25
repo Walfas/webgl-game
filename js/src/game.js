@@ -67,6 +67,17 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			gl.bindTexture(gl.TEXTURE_2D, this.level.textureAtlas.texture);
 			gl.uniform1i(data.world.u.Sampler, 0);
 
+			gl.uniform1f(data.world.u.Light[0].enabled, 1);
+			gl.uniform3fv(data.world.u.Light[0].color, [1,0,0]);
+			gl.uniform3fv(data.world.u.Light[0].position, [10,0,0]);
+			gl.uniform1f(data.world.u.Light[1].enabled, 1);
+			gl.uniform3fv(data.world.u.Light[1].color, [0,1,0]);
+			gl.uniform3fv(data.world.u.Light[1].position, [0,10,0]);
+			gl.uniform1f(data.world.u.Light[2].enabled, 1);
+			gl.uniform3fv(data.world.u.Light[2].color, [0,0,1]);
+			gl.uniform3fv(data.world.u.Light[2].position, [0,0,10]);
+
+
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
 			gl.drawElements(gl.TRIANGLES, this.level.numVertices(), gl.UNSIGNED_SHORT, 0);
 		}

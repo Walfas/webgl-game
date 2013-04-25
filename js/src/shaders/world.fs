@@ -17,7 +17,7 @@ varying vec3 vViewVec;
 varying vec4 vPosition;
 varying vec2 vTexture;
 
-uniform PointLight uLight[1];
+uniform PointLight uLight[4];
 uniform sampler2D uDepthMap;
 
 uniform sampler2D uSampler; // texture coords
@@ -37,7 +37,7 @@ void main(void) {
 
 	vec3 color = uAmbientColor;
 
-	for (int i=0; i<1; i++) {
+	for (int i=0; i<4; i++) {
 		if (uLight[i].enabled < 0.5)
 			continue;
 		vec3 lightVec = normalize(uLight[i].position - vWorldVertex.xyz);
