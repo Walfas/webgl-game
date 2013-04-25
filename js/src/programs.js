@@ -3,7 +3,7 @@ define([
 	"text!shaders/world.vs", "text!shaders/world.fs", 
 	"text!shaders/depth.vs", "text!shaders/depth.fs"
 	], 
-	function(gl, worldV, worldF, depthV, depthF){
+	function(gl, worldV, worldF, depthV, depthF) {
 		/** Returns compiled shader */
 		this.getShader = function(type, text) {
 			var shader = gl.createShader(type);
@@ -31,10 +31,55 @@ define([
 
 			return shaderProgram;
 		}
+		
+		this.newProgram = function(vs, fs, att, uni) {
+			var glProgram = this.initShader(vs,fs);
+			var p = {
+				program: glProgram,
+				a: {},
+				u: {}
+			};
+			for (var i=0; i<att.length; i++) {
+				p.a[att[i]] = gl.getAttribLocation(glProgram, att[i]);
+				gl.enableVertexAttribArray(p.a[att[i]]);
+			}
+			for (var i=0; i<uni.length; i++) 
+				p.u[uni[i]] = gl.getUniformLocation(glProgram, uni[i]);
+			return p;
+		}
 
 		return {
-			worldShader: this.initShader(worldV,worldF),
-			depthShader: this.initShader(depthV,depthF)
+			world: this.newProgram(
+				worldV, worldF, 
+				[
+					"aPosition", 
+					"aTexture", 
+					"aNormal"
+				],
+				[
+					"uPMatrix", 
+					"uNMatrix", 
+					"uMMatrix", 
+					"uVMatrix", 
+					"uSampler", 
+					"uLightVMatrix", 
+					"uLightPMatrix", 
+					"uAmbientColor", 
+					"uDepthMap", 
+					"uLight"
+				]
+			),
+			depth: this.newProgram(
+				depthV, depthF,
+				[
+					"aPosition"
+				],
+				[
+					"uPMatrix", 
+					"uNMatrix", 
+					"uMMatrix", 
+				]
+			)
 		};
 
 	}

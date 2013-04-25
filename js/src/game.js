@@ -40,13 +40,13 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			//glmat.mat4.rotateX(data.mvMatrix, data.mvMatrix, .01);
 			glmat.mat4.rotateY(data.world.vMatrix, data.world.vMatrix, .01);
 
-			gl.uniformMatrix4fv(data.world.uMMatrix, false, data.world.mMatrix);
-			gl.uniformMatrix4fv(data.world.uVMatrix, false, data.world.vMatrix);
-			gl.uniformMatrix4fv(data.world.uPMatrix, false, data.world.pMatrix);
-			gl.uniformMatrix3fv(data.world.uNMatrix, false, data.world.nMatrix);
+			gl.uniformMatrix4fv(data.world.u.uMMatrix, false, data.world.mMatrix);
+			gl.uniformMatrix4fv(data.world.u.uVMatrix, false, data.world.vMatrix);
+			gl.uniformMatrix4fv(data.world.u.uPMatrix, false, data.world.pMatrix);
+			gl.uniformMatrix3fv(data.world.u.uNMatrix, false, data.world.nMatrix);
 
 			// DEBUG
-			gl.uniform3fv(data.world.uAmbientColor, [.2,.2,.4]);
+			gl.uniform3fv(data.world.u.uAmbientColor, [.2,.2,.4]);
 			//gl.uniform3fv(data.uPointLightingLocation, [100,100,100]);
 			//gl.uniform3fv(data.uPointLightingColor, [.8,.4,.4]);
 
@@ -55,17 +55,17 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 
 			// Bind buffers
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.vertexObject);
-			gl.vertexAttribPointer(data.world.aPosition, 3, gl.FLOAT, false, 0, 0);
+			gl.vertexAttribPointer(data.world.a.aPosition, 3, gl.FLOAT, false, 0, 0);
 
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.texCoordObject);
-			gl.vertexAttribPointer(data.world.aTexture, 2, gl.FLOAT, false, 0, 0);
+			gl.vertexAttribPointer(data.world.a.aTexture, 2, gl.FLOAT, false, 0, 0);
 
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.normalObject);
-			gl.vertexAttribPointer(data.world.aNormal, 3, gl.FLOAT, false, 0, 0);
+			gl.vertexAttribPointer(data.world.a.aNormal, 3, gl.FLOAT, false, 0, 0);
 
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, this.level.textureAtlas.texture);
-			gl.uniform1i(data.uSampler, 0);
+			gl.uniform1i(data.world.u.uSampler, 0);
 
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
 			gl.drawElements(gl.TRIANGLES, this.level.numVertices(), gl.UNSIGNED_SHORT, 0);
