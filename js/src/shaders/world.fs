@@ -35,7 +35,7 @@ void main(void) {
 	if (texColor.a < 0.1)
 		discard;
 
-	vec3 color = uAmbientColor + texColor.xyz;
+	vec3 color = uAmbientColor;
 
 	for (int i=0; i<1; i++) {
 		if (uLight[i].enabled < 0.5)
@@ -54,8 +54,7 @@ void main(void) {
 	if (depth.z > unpack(texture2D(uDepthMap, depth.xy)))
 		shadow *= 0.5;
 
-	color += texColor.xyz;
-	gl_FragColor = clamp(vec4(color*shadow, texColor.a), 0.0, 1.0);
+	gl_FragColor = clamp(vec4(texColor.rgb*color*shadow, texColor.a), 0.0, 1.0);
 
 /*
 	vec4 fragmentColor = texture2D(uSampler, vec2(vTexture.s, vTexture.t));
