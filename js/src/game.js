@@ -46,7 +46,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			gl.uniformMatrix3fv(data.world.u.NMatrix, false, data.world.m.nMatrix);
 
 			// DEBUG
-			gl.uniform3fv(data.world.u.AmbientColor, [.2,.2,.4]);
+			gl.uniform3fv(data.world.u.AmbientColor, [.2,.2,.2]);
 			//gl.uniform3fv(data.uPointLightingLocation, [100,100,100]);
 			//gl.uniform3fv(data.uPointLightingColor, [.8,.4,.4]);
 
@@ -68,12 +68,17 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			gl.uniform1i(data.world.u.Sampler, 0);
 
 			gl.uniform1f(data.world.u.Light[0].enabled, 1);
+			gl.uniform3fv(data.world.u.Light[0].attenuation, [0,0.3,0]);
 			gl.uniform3fv(data.world.u.Light[0].color, [1,0,0]);
-			gl.uniform3fv(data.world.u.Light[0].position, [10,0,0]);
+			gl.uniform3fv(data.world.u.Light[0].position, [0,0,0]);
+
 			gl.uniform1f(data.world.u.Light[1].enabled, 1);
+			gl.uniform3fv(data.world.u.Light[1].attenuation, [0,0.4,0]);
 			gl.uniform3fv(data.world.u.Light[1].color, [0,1,0]);
-			gl.uniform3fv(data.world.u.Light[1].position, [0,10,0]);
+			gl.uniform3fv(data.world.u.Light[1].position, [0,0,-10]);
+
 			gl.uniform1f(data.world.u.Light[2].enabled, 1);
+			gl.uniform3fv(data.world.u.Light[2].attenuation, [0,0.4,0]);
 			gl.uniform3fv(data.world.u.Light[2].color, [0,0,1]);
 			gl.uniform3fv(data.world.u.Light[2].position, [0,0,10]);
 

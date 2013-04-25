@@ -4,6 +4,7 @@ define(["glmatrix", "data"], function(glmat, data) {
 			this.enabled = true;
 			this.color = [1.0, 1.0, 1.0];
 			this.position = [0.0, 0.0, 0.0];
+			this.attenuation = [1.0, 0.0, 0.0];
 		},
 
 		DepthShader: function() {

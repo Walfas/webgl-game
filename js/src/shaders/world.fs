@@ -9,6 +9,7 @@ struct PointLight
 	float enabled;
 	vec3 color;
 	vec3 position;
+	vec3 attenuation;
 };
 
 varying vec4 vWorldVertex;
@@ -42,8 +43,17 @@ void main(void) {
 			continue;
 		vec3 lightVec = normalize(uLight[i].position - vWorldVertex.xyz);
 		float l = dot(normal, lightVec);
-		if (l > 0.0)
-			color += l*uLight[i].color;
+
+		if (l <= 0.0)
+			continue;
+
+		float d = distance(vWorldVertex.xyz, uLight[i].position);
+		float a = 1.0/(
+			uLight[i].attenuation.x +
+			uLight[i].attenuation.y*d + 
+			uLight[i].attenuation.z*d*d
+		);
+		color += l*a*uLight[i].color;
 	}
 
 	vec3 depth = vPosition.xyz / vPosition.w;
