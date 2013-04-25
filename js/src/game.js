@@ -27,8 +27,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 
 				this.lights = [];
 				this.lights[0] = new light.PointLight([1.0, 0.5, 0.0]);
-				glmat.mat4.rotateX(data.world.m.vMatrix, data.world.m.vMatrix, Math.PI/5);
-				glmat.mat4.rotateY(data.world.m.vMatrix, data.world.m.vMatrix, -Math.PI/6);
+				this.theta = [Math.PI/5, -Math.PI/6, 0];
 
 				this.level.generate(cubes);
 				tick();
@@ -42,8 +41,21 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 			gl.viewport(0, 0, canvas.width, canvas.height);
 			glmat.mat4.perspective(data.world.m.pMatrix, 45.0, canvas.width/canvas.height, 0.1, 100.0);
 
-			//glmat.mat4.rotateX(data.mvMatrix, data.mvMatrix, .01);
-			//glmat.mat4.rotateY(data.world.m.vMatrix, data.world.m.vMatrix, .01);
+			if (input.rightClick) {
+				this.theta[0] += input.mouseMove[1] * .01;
+				this.theta[1] += input.mouseMove[0] * .01;
+				if (this.theta[0] < -Math.PI/4)
+					this.theta[0] = -Math.PI/4;
+				if (this.theta[0] > Math.PI/2)
+					this.theta[0] = Math.PI/2;
+			}
+			input.mouseMove = [0,0];
+
+			var rotationMat = glmat.mat4.create();
+			glmat.mat4.identity(rotationMat);
+			glmat.mat4.rotateX(rotationMat, rotationMat, this.theta[0]);
+			glmat.mat4.rotateY(rotationMat, rotationMat, this.theta[1]);
+			glmat.mat4.rotateZ(data.world.m.vMatrix, rotationMat, this.theta[2]);
 
 			gl.uniformMatrix4fv(data.world.u.MMatrix, false, data.world.m.mMatrix);
 			gl.uniformMatrix4fv(data.world.u.VMatrix, false, data.world.m.vMatrix);
