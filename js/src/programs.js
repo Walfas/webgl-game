@@ -1,9 +1,9 @@
 define([
-	"gl",
+	"gl", "glmatrix",
 	"text!shaders/world.vs", "text!shaders/world.fs", 
 	"text!shaders/depth.vs", "text!shaders/depth.fs"
 	], 
-	function(gl, worldV, worldF, depthV, depthF) {
+	function(gl, glmat, worldV, worldF, depthV, depthF) {
 		/** Returns compiled shader */
 		this.getShader = function(type, text) {
 			var shader = gl.createShader(type);
@@ -32,19 +32,33 @@ define([
 			return shaderProgram;
 		}
 		
-		this.newProgram = function(vs, fs, att, uni) {
+		this.newProgram = function(vs, fs, att, uni, mats) {
 			var glProgram = this.initShader(vs,fs);
 			var p = {
 				program: glProgram,
 				a: {},
-				u: {}
+				u: {},
+				m: {}
 			};
 			for (var i=0; i<att.length; i++) {
-				p.a[att[i]] = gl.getAttribLocation(glProgram, att[i]);
+				p.a[att[i]] = gl.getAttribLocation(glProgram, "a"+att[i]);
 				gl.enableVertexAttribArray(p.a[att[i]]);
 			}
-			for (var i=0; i<uni.length; i++) 
-				p.u[uni[i]] = gl.getUniformLocation(glProgram, uni[i]);
+			for (var i=0; i<uni.length; i++) {
+				p.u[uni[i]] = gl.getUniformLocation(glProgram, "u"+uni[i]);
+			}
+			for (var prop in mats) {
+				var size = mats[prop];
+				var mat;
+				switch(size) {
+				case 2: mat = glmat.mat2; break;
+				case 3: mat = glmat.mat3; break;
+				case 4: mat = glmat.mat4; break;
+				default: console.log("Invalid matrix size");
+				}
+				p.m[prop] = mat.create();
+				mat.identity(p.m[prop]);
+			}
 			return p;
 		}
 
@@ -52,33 +66,44 @@ define([
 			world: this.newProgram(
 				worldV, worldF, 
 				[
-					"aPosition", 
-					"aTexture", 
-					"aNormal"
+					"Position", 
+					"Texture", 
+					"Normal"
 				],
 				[
-					"uPMatrix", 
-					"uNMatrix", 
-					"uMMatrix", 
-					"uVMatrix", 
-					"uSampler", 
-					"uLightVMatrix", 
-					"uLightPMatrix", 
-					"uAmbientColor", 
-					"uDepthMap", 
-					"uLight"
-				]
+					"NMatrix", 
+					"PMatrix", 
+					"MMatrix", 
+					"VMatrix", 
+					"Sampler", 
+					"LightVMatrix", 
+					"LightPMatrix", 
+					"AmbientColor", 
+					"DepthMap", 
+					"Light"
+				],
+				{
+					pMatrix: 4,
+					mMatrix: 4,
+					vMatrix: 4,
+					nMatrix: 3
+				}
 			),
 			depth: this.newProgram(
 				depthV, depthF,
 				[
-					"aPosition"
+					"Position"
 				],
 				[
-					"uPMatrix", 
-					"uNMatrix", 
-					"uMMatrix", 
-				]
+					"PMatrix", 
+					"NMatrix", 
+					"MMatrix", 
+				],
+				{
+					pMatrix: 4,
+					mMatrix: 4,
+					vMatrix: 4
+				}
 			)
 		};
 
