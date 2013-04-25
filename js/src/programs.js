@@ -1,14 +1,11 @@
-define(["gl"], function(gl){
-	window.requestAnimFrame = (function(){
-	  return window.requestAnimationFrame	   ||
-			 window.webkitRequestAnimationFrame ||
-			 window.mozRequestAnimationFrame	||
-			 function(callback) { window.setTimeout(callback, 1000 / 60); };
-	})();
-
-	return {
+define([
+	"gl",
+	"text!shaders/world.vs", "text!shaders/world.fs", 
+	"text!shaders/depth.vs", "text!shaders/depth.fs"
+	], 
+	function(gl, worldV, worldF, depthV, depthF){
 		/** Returns compiled shader */
-		getShader: function(type, text) {
+		this.getShader = function(type, text) {
 			var shader = gl.createShader(type);
 			gl.shaderSource(shader, text);
 			gl.compileShader(shader);
@@ -20,10 +17,10 @@ define(["gl"], function(gl){
 			}
 
 			return shader;
-		},
+		}
 
 		/** Assigns shaders to program and returns the program */
-		initShader: function(vertexShaderText, fragmentShaderText) {
+		this.initShader = function(vertexShaderText, fragmentShaderText) {
 			var shaderProgram = gl.createProgram();
 			gl.attachShader(shaderProgram, this.getShader(gl.VERTEX_SHADER, vertexShaderText));
 			gl.attachShader(shaderProgram, this.getShader(gl.FRAGMENT_SHADER, fragmentShaderText));
@@ -33,7 +30,14 @@ define(["gl"], function(gl){
 				throw new Error("Could not initialize shaders");
 
 			return shaderProgram;
-		},
-	};
-});
+		}
+
+		return {
+			worldShader: this.initShader(worldV,worldF),
+			depthShader: this.initShader(depthV,depthF)
+		};
+
+	}
+);
+
 

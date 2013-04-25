@@ -1,10 +1,10 @@
-define(["gl", "glmatrix", "util", "text!shaders/vertex.shader", "text!shaders/fragment.shader"], 
-	function(gl, glmat, util, vShader, fShader){
-		program = util.initShader(vShader, fShader);
-		gl.useProgram(program);
+define(["gl", "glmatrix", "programs"], 
+	function(gl, glmat, programs){
+		var program = programs.worldShader;
+		gl.useProgram(programs.worldShader);
 
 		var data = {
-			program: program,
+			program: programs.worldShader,
 			background: [0.5, 0.5, 0.5, 1.0],
 
 			pMatrix: glmat.mat4.create(),
