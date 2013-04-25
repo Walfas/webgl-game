@@ -1,5 +1,5 @@
-require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"], 
-	function(canvas, gl, glmat, data, texture, terrain, input) {
+require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "input"], 
+	function(canvas, gl, glmat, data, texture, terrain, light, input) {
 
 		texture.land = new texture.TextureAtlas("img/jolicraft.png", 16);
 		this.level = null;
@@ -25,6 +25,11 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 					}
 				}
 
+				this.lights = [];
+				this.lights[0] = new light.PointLight([1.0, 0.5, 0.0]);
+				glmat.mat4.rotateX(data.world.m.vMatrix, data.world.m.vMatrix, Math.PI/5);
+				glmat.mat4.rotateY(data.world.m.vMatrix, data.world.m.vMatrix, -Math.PI/6);
+
 				this.level.generate(cubes);
 				tick();
 			}
@@ -38,7 +43,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			glmat.mat4.perspective(data.world.m.pMatrix, 45.0, canvas.width/canvas.height, 0.1, 100.0);
 
 			//glmat.mat4.rotateX(data.mvMatrix, data.mvMatrix, .01);
-			glmat.mat4.rotateY(data.world.m.vMatrix, data.world.m.vMatrix, .01);
+			//glmat.mat4.rotateY(data.world.m.vMatrix, data.world.m.vMatrix, .01);
 
 			gl.uniformMatrix4fv(data.world.u.MMatrix, false, data.world.m.mMatrix);
 			gl.uniformMatrix4fv(data.world.u.VMatrix, false, data.world.m.vMatrix);
@@ -46,9 +51,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			gl.uniformMatrix3fv(data.world.u.NMatrix, false, data.world.m.nMatrix);
 
 			// DEBUG
-			gl.uniform3fv(data.world.u.AmbientColor, [.2,.2,.2]);
-			//gl.uniform3fv(data.uPointLightingLocation, [100,100,100]);
-			//gl.uniform3fv(data.uPointLightingColor, [.8,.4,.4]);
+			gl.uniform3fv(data.world.u.AmbientColor, [.1,.1,.1]);
 
 			gl.clearColor.apply(this,data.background);
 			gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
@@ -67,21 +70,17 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "input"],
 			gl.bindTexture(gl.TEXTURE_2D, this.level.textureAtlas.texture);
 			gl.uniform1i(data.world.u.Sampler, 0);
 
-			gl.uniform1f(data.world.u.Light[0].enabled, 1);
-			gl.uniform3fv(data.world.u.Light[0].attenuation, [0,0.3,0]);
-			gl.uniform3fv(data.world.u.Light[0].color, [1,0,0]);
-			gl.uniform3fv(data.world.u.Light[0].position, [0,0,0]);
+			if (input.pressedKeys[65]) this.lights[0].position[0] -= 0.1;
+			if (input.pressedKeys[68]) this.lights[0].position[0] += 0.1;
+			if (input.pressedKeys[83]) this.lights[0].position[1] -= 0.1;
+			if (input.pressedKeys[87]) this.lights[0].position[1] += 0.1;
 
-			gl.uniform1f(data.world.u.Light[1].enabled, 1);
-			gl.uniform3fv(data.world.u.Light[1].attenuation, [0,0.4,0]);
-			gl.uniform3fv(data.world.u.Light[1].color, [0,1,0]);
-			gl.uniform3fv(data.world.u.Light[1].position, [0,0,-10]);
-
-			gl.uniform1f(data.world.u.Light[2].enabled, 1);
-			gl.uniform3fv(data.world.u.Light[2].attenuation, [0,0.4,0]);
-			gl.uniform3fv(data.world.u.Light[2].color, [0,0,1]);
-			gl.uniform3fv(data.world.u.Light[2].position, [0,0,10]);
-
+			for (var i=0; i<this.lights.length; i++) {
+				gl.uniform1f(data.world.u.Light[i].enabled, this.lights[i].enabled);
+				gl.uniform3fv(data.world.u.Light[i].attenuation, this.lights[i].attenuation);
+				gl.uniform3fv(data.world.u.Light[i].color, this.lights[i].color);
+				gl.uniform3fv(data.world.u.Light[i].position, this.lights[i].position);
+			}
 
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
 			gl.drawElements(gl.TRIANGLES, this.level.numVertices(), gl.UNSIGNED_SHORT, 0);
