@@ -5,6 +5,7 @@ define(["canvas"], function(canvas) {
 		pressedKeys: {},
 		leftClick: false,
 		rightClick: false,
+		scroll: 0,
 	};
 
 	canvas.onmousedown = function(event) {
@@ -27,6 +28,18 @@ define(["canvas"], function(canvas) {
 			input.leftClick = event.button == 1 ? false : input.leftClick; 
 			input.rightClick = event.button == 2 ? false : input.leftClick; 
 		}
+	}
+
+	canvas.onmousewheel = function(event) {
+		var delta = 0;
+		if (!event) // IE
+			event = window.event;
+		if (event.wheelDelta) // IE/Opera
+			delta = event.wheelDelta/120;
+		else if (event.detail)  // Mozilla
+			delta = -event.detail/3;
+
+		input.scroll = delta;
 	}
 
 	document.onkeydown = function(event) {

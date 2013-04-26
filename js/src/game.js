@@ -27,7 +27,8 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 
 				this.lights = [];
 				this.lights[0] = new light.PointLight([1.0, 0.5, 0.0]);
-				this.theta = [Math.PI/5, -Math.PI/6, 0];
+				this.theta = [0.0, 0.0, 0.0];
+				this.scale = 1.0;
 
 				this.level.generate(cubes);
 				tick();
@@ -41,6 +42,8 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 			gl.viewport(0, 0, canvas.width, canvas.height);
 			glmat.mat4.perspective(data.world.m.pMatrix, 45.0, canvas.width/canvas.height, 0.1, 100.0);
 
+			var viewMatrix = glmat.mat4.create();
+			glmat.mat4.identity(viewMatrix);
 			if (input.rightClick) {
 				this.theta[0] += input.mouseMove[1] * .01;
 				this.theta[1] += input.mouseMove[0] * .01;
@@ -49,13 +52,27 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 				if (this.theta[0] > Math.PI/2)
 					this.theta[0] = Math.PI/2;
 			}
-			input.mouseMove = [0,0];
+			glmat.mat4.rotateX(viewMatrix, viewMatrix, this.theta[0]);
+			glmat.mat4.rotateY(viewMatrix, viewMatrix, this.theta[1]);
+			glmat.mat4.rotateZ(viewMatrix, viewMatrix, this.theta[2]);
+			glmat.mat4.scale(viewMatrix, viewMatrix, [this.scale, this.scale, this.scale]);
 
-			var rotationMat = glmat.mat4.create();
-			glmat.mat4.identity(rotationMat);
-			glmat.mat4.rotateX(rotationMat, rotationMat, this.theta[0]);
-			glmat.mat4.rotateY(rotationMat, rotationMat, this.theta[1]);
-			glmat.mat4.rotateZ(data.world.m.vMatrix, rotationMat, this.theta[2]);
+			input.mouseMove = [0,0];
+			if (input.scroll) {
+				this.scale += input.scroll * 0.1;
+				if (this.scale < 0.1)
+					this.scale = 0.1;
+				if (this.scale > 5)
+					this.scale = 5;
+				input.scroll = 0;
+			}
+
+			if (input.pressedKeys[65]) this.lights[0].position[0] -= 0.1;
+			if (input.pressedKeys[68]) this.lights[0].position[0] += 0.1;
+			if (input.pressedKeys[83]) this.lights[0].position[1] -= 0.1;
+			if (input.pressedKeys[87]) this.lights[0].position[1] += 0.1;
+
+			data.world.m.vMatrix = viewMatrix;
 
 			gl.uniformMatrix4fv(data.world.u.MMatrix, false, data.world.m.mMatrix);
 			gl.uniformMatrix4fv(data.world.u.VMatrix, false, data.world.m.vMatrix);
@@ -81,11 +98,6 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, this.level.textureAtlas.texture);
 			gl.uniform1i(data.world.u.Sampler, 0);
-
-			if (input.pressedKeys[65]) this.lights[0].position[0] -= 0.1;
-			if (input.pressedKeys[68]) this.lights[0].position[0] += 0.1;
-			if (input.pressedKeys[83]) this.lights[0].position[1] -= 0.1;
-			if (input.pressedKeys[87]) this.lights[0].position[1] += 0.1;
 
 			for (var i=0; i<this.lights.length; i++) {
 				gl.uniform1f(data.world.u.Light[i].enabled, this.lights[i].enabled);
