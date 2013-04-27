@@ -41,14 +41,13 @@ define([
 				m: {}
 			};
 			// Set attributes
-			for (var i=0; i<att.length; i++) {
+			for (var i=0; i<att.length; i++) 
 				p.a[att[i]] = gl.getAttribLocation(glProgram, "a"+att[i]);
-				//gl.enableVertexAttribArray(p.a[att[i]]);
-			}
+
 			// Set uniforms
-			for (var i=0; i<uni.length; i++) {
+			for (var i=0; i<uni.length; i++) 
 				p.u[uni[i]] = gl.getUniformLocation(glProgram, "u"+uni[i]);
-			}
+
 			// Initialize matrices
 			for (var prop in mats) {
 				var size = mats[prop];

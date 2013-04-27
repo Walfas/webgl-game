@@ -1,5 +1,5 @@
-require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "input"], 
-	function(canvas, gl, glmat, data, texture, terrain, light, input) {
+require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "camera", "input"], 
+	function(canvas, gl, glmat, data, texture, terrain, light, camera, input) {
 
 		texture.land = new texture.TextureAtlas("img/jolicraft.png", 16);
 		this.level = null;
@@ -27,12 +27,12 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 
 				this.lights = [];
 				this.lights[0] = new light.PointLight([1.0, 0.5, 0.0]);
-				this.theta = [-Math.PI/2, 0.0, 0.0];
-				this.scale = 1.0;
+				this.camera = new camera.Camera();
+				//this.theta = [-Math.PI/2, 0.0, 0.0];
+				//this.scale = 1.0;
 
 				this.level.generate(cubes);
 
-				//gl.useProgram(data.depth.program);
 				tick();
 			}
 			else 
@@ -44,31 +44,42 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 			gl.viewport(0, 0, canvas.width, canvas.height);
 			glmat.mat4.perspective(data.world.m.pMatrix, 45.0, canvas.width/canvas.height, 0.1, 100.0);
 
-			var viewMatrix = glmat.mat4.create();
-			glmat.mat4.identity(viewMatrix);
-			if (input.rightClick) {
-				this.theta[0] += input.mouseMove[1] * data.rotateSpeed;
-				this.theta[2] += input.mouseMove[0] * data.rotateSpeed;
-				this.theta[0] = this.theta[0].clamp(data.rotateLimits[0],data.rotateLimits[1]);
-			}
-			glmat.mat4.rotateX(viewMatrix, viewMatrix, this.theta[0]);
-			glmat.mat4.rotateY(viewMatrix, viewMatrix, this.theta[1]);
-			glmat.mat4.rotateZ(viewMatrix, viewMatrix, this.theta[2]);
-			glmat.mat4.scale(viewMatrix, viewMatrix, [this.scale, this.scale, this.scale]);
-
-			input.mouseMove = [0,0];
-			if (input.scroll) {
-				this.scale += input.scroll * 0.1;
-				this.scale = this.scale.clamp(data.zoomLimits[0],data.zoomLimits[1]);
-				input.scroll = 0;
-			}
-
 			if (input.pressedKeys[65]) this.lights[0].position[0] -= 0.1;
 			if (input.pressedKeys[68]) this.lights[0].position[0] += 0.1;
 			if (input.pressedKeys[83]) this.lights[0].position[1] -= 0.1;
 			if (input.pressedKeys[87]) this.lights[0].position[1] += 0.1;
+			this.camera.moveCenter(this.lights[0].position);
 
-			data.world.m.vMatrix = viewMatrix;
+			//var viewMatrix = glmat.mat4.create();
+			//glmat.mat4.identity(viewMatrix);
+			if (input.rightClick) {
+			/*
+				this.theta[0] += input.mouseMove[1] * data.rotateSpeed;
+				this.theta[2] += input.mouseMove[0] * data.rotateSpeed;
+				this.theta[0] = this.theta[0].clamp(data.rotateLimits[0],data.rotateLimits[1]);
+			*/
+				var angleChange = [-input.mouseMove[1]*data.rotateSpeed, 0, input.mouseMove[0]*data.rotateSpeed];
+				this.camera.changeAngle(angleChange);
+			}
+			/*
+			glmat.mat4.rotateX(viewMatrix, viewMatrix, this.theta[0]);
+			glmat.mat4.rotateY(viewMatrix, viewMatrix, this.theta[1]);
+			glmat.mat4.rotateZ(viewMatrix, viewMatrix, this.theta[2]);
+			glmat.mat4.scale(viewMatrix, viewMatrix, [this.scale, this.scale, this.scale]);
+			*/
+
+			input.mouseMove = [0,0];
+			if (input.scroll) {
+			/*
+				this.scale += input.scroll * 0.1;
+				this.scale = this.scale.clamp(data.zoomLimits[0],data.zoomLimits[1]);
+				*/
+				this.camera.changeDistance(input.scroll);
+				input.scroll = 0;
+			}
+			this.camera.updateMatrix();
+
+			data.world.m.vMatrix = this.camera.matrix;
 
 			gl.uniformMatrix4fv(data.world.u.MMatrix, false, data.world.m.mMatrix);
 			gl.uniformMatrix4fv(data.world.u.VMatrix, false, data.world.m.vMatrix);
@@ -107,24 +118,6 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
 			gl.drawElements(gl.TRIANGLES, this.level.numVertices(), gl.UNSIGNED_SHORT, 0);
-/*
-			glmat.mat4.perspective(data.depth.m.pMatrix, 45.0, canvas.width/canvas.height, 0.1, 100.0);
-
-			data.depth.m.vMatrix = viewMatrix;
-			gl.clearColor.apply(this,data.background);
-			gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-
-			gl.uniformMatrix4fv(data.depth.u.MMatrix, false, data.depth.m.mMatrix);
-			gl.uniformMatrix4fv(data.depth.u.VMatrix, false, data.depth.m.vMatrix);
-			gl.uniformMatrix4fv(data.depth.u.PMatrix, false, data.depth.m.pMatrix);
-
-			gl.enableVertexAttribArray(data.depth.a.Position);
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.vertexObject);
-			gl.vertexAttribPointer(data.depth.a.Position, 3, gl.FLOAT, false, 0, 0);
-
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
-			gl.drawElements(gl.TRIANGLES, this.level.numVertices(), gl.UNSIGNED_SHORT, 0);
-			*/
 		}
 
 		function tick() {

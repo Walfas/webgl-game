@@ -17,9 +17,8 @@ varying vec4 vPosition;
 varying vec2 vTexture;
 
 void main(void) {
-	vWorldVertex = uMMatrix * vec4(aPosition + vec3(-8,-8,-8), 1.0);
+	vWorldVertex = uMMatrix * vec4(aPosition, 1.0);
 	vec4 viewVertex = uVMatrix * vWorldVertex;
-	viewVertex += vec4(0,0,-16,0);
 	gl_Position = uPMatrix * viewVertex;
 
 	vTexture = aTexture;
@@ -27,13 +26,5 @@ void main(void) {
 	vViewVec = normalize(-viewVertex.xyz);
 
 	vPosition = uLightPMatrix * uLightVMatrix * vWorldVertex;
-
-	/*
-	vPosition = uMVMatrix * vec4(aPosition + vec3(-8,-8,-8), 1.0);
-	vPosition += vec4(0,0,-16,0);
-	gl_Position = uPMatrix * vPosition;
-	vTexture = aTexture;
-	vTransformedNormal = uNMatrix * aNormal;
-	*/
 }
 
