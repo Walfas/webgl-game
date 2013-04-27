@@ -31,6 +31,8 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 				this.scale = 1.0;
 
 				this.level.generate(cubes);
+
+				//gl.useProgram(data.depth.program);
 				tick();
 			}
 			else 
@@ -74,18 +76,21 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 			gl.uniformMatrix3fv(data.world.u.NMatrix, false, data.world.m.nMatrix);
 
 			// DEBUG
-			gl.uniform3fv(data.world.u.AmbientColor, [1,1,1]);
+			gl.uniform3fv(data.world.u.AmbientColor, [0.5,0.5,0.5]);
 
 			gl.clearColor.apply(this,data.background);
 			gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
 			// Bind buffers
+			gl.enableVertexAttribArray(data.world.a.Position);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.vertexObject);
 			gl.vertexAttribPointer(data.world.a.Position, 3, gl.FLOAT, false, 0, 0);
 
+			gl.enableVertexAttribArray(data.world.a.Texture);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.texCoordObject);
 			gl.vertexAttribPointer(data.world.a.Texture, 2, gl.FLOAT, false, 0, 0);
 
+			gl.enableVertexAttribArray(data.world.a.normalObject);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.normalObject);
 			gl.vertexAttribPointer(data.world.a.Normal, 3, gl.FLOAT, false, 0, 0);
 
@@ -102,6 +107,24 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
 			gl.drawElements(gl.TRIANGLES, this.level.numVertices(), gl.UNSIGNED_SHORT, 0);
+/*
+			glmat.mat4.perspective(data.depth.m.pMatrix, 45.0, canvas.width/canvas.height, 0.1, 100.0);
+
+			data.depth.m.vMatrix = viewMatrix;
+			gl.clearColor.apply(this,data.background);
+			gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+
+			gl.uniformMatrix4fv(data.depth.u.MMatrix, false, data.depth.m.mMatrix);
+			gl.uniformMatrix4fv(data.depth.u.VMatrix, false, data.depth.m.vMatrix);
+			gl.uniformMatrix4fv(data.depth.u.PMatrix, false, data.depth.m.pMatrix);
+
+			gl.enableVertexAttribArray(data.depth.a.Position);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.vertexObject);
+			gl.vertexAttribPointer(data.depth.a.Position, 3, gl.FLOAT, false, 0, 0);
+
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
+			gl.drawElements(gl.TRIANGLES, this.level.numVertices(), gl.UNSIGNED_SHORT, 0);
+			*/
 		}
 
 		function tick() {

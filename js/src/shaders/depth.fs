@@ -21,6 +21,7 @@ vec4 pack(float depth) {
 
 void main(void) {
 	float linearDepth = length(vPosition) * LinearDepthConstant;
-	gl_FragColor = pack(linearDepth);
+	/*gl_FragColor = pack(linearDepth);*/
+	gl_FragColor = vec4(1.0,0.0,1.0,1.0);
 }
 
