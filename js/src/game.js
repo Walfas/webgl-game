@@ -27,7 +27,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 
 				this.lights = [];
 				this.lights[0] = new light.PointLight([1.0, 0.5, 0.0]);
-				this.theta = [0.0, 0.0, 0.0];
+				this.theta = [-Math.PI/2, 0.0, 0.0];
 				this.scale = 1.0;
 
 				this.level.generate(cubes);
@@ -45,12 +45,9 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 			var viewMatrix = glmat.mat4.create();
 			glmat.mat4.identity(viewMatrix);
 			if (input.rightClick) {
-				this.theta[0] += input.mouseMove[1] * .01;
-				this.theta[1] += input.mouseMove[0] * .01;
-				if (this.theta[0] < -Math.PI/4)
-					this.theta[0] = -Math.PI/4;
-				if (this.theta[0] > Math.PI/2)
-					this.theta[0] = Math.PI/2;
+				this.theta[0] += input.mouseMove[1] * data.rotateSpeed;
+				this.theta[2] += input.mouseMove[0] * data.rotateSpeed;
+				this.theta[0] = this.theta[0].clamp(data.rotateLimits[0],data.rotateLimits[1]);
 			}
 			glmat.mat4.rotateX(viewMatrix, viewMatrix, this.theta[0]);
 			glmat.mat4.rotateY(viewMatrix, viewMatrix, this.theta[1]);
@@ -60,10 +57,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 			input.mouseMove = [0,0];
 			if (input.scroll) {
 				this.scale += input.scroll * 0.1;
-				if (this.scale < 0.1)
-					this.scale = 0.1;
-				if (this.scale > 5)
-					this.scale = 5;
+				this.scale = this.scale.clamp(data.zoomLimits[0],data.zoomLimits[1]);
 				input.scroll = 0;
 			}
 
@@ -80,7 +74,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "inp
 			gl.uniformMatrix3fv(data.world.u.NMatrix, false, data.world.m.nMatrix);
 
 			// DEBUG
-			gl.uniform3fv(data.world.u.AmbientColor, [.1,.1,.1]);
+			gl.uniform3fv(data.world.u.AmbientColor, [1,1,1]);
 
 			gl.clearColor.apply(this,data.background);
 			gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);

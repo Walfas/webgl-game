@@ -16,6 +16,10 @@ window.requestAnimFrame = (function(){
 		 function(callback) { window.setTimeout(callback, 1000 / 60); };
 })();
 
+Number.prototype.clamp = function(min, max) {
+	return (this < min ? min : (this > max ? max : this));
+};
+
 define(["game"], function(game) {
 });
 

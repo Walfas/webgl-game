@@ -36,8 +36,10 @@ define(["canvas"], function(canvas) {
 			event = window.event;
 		if (event.wheelDelta) // IE/Opera
 			delta = event.wheelDelta/120;
-		else if (event.detail)  // Mozilla
-			delta = -event.detail/3;
+		else if (event.detail) { // Mozilla
+			delta = event.detail
+			console.log(event.detail);
+		}
 
 		input.scroll = delta;
 	}

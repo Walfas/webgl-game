@@ -13,6 +13,9 @@ define(["gl", "glmatrix", "programs", "light"],
 		}
 
 		data.background = [0.5, 0.5, 0.5, 1.0];
+		data.rotateSpeed = 0.01;
+		data.rotateLimits = [-0.6*Math.PI, -0.2*Math.PI];
+		data.zoomLimits = [0.5, 5.0];
 
 		gl.enable(gl.DEPTH_TEST);
 		//gl.enable(gl.CULL_FACE);
