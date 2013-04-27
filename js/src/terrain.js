@@ -2,6 +2,7 @@ define(["gl","texture"], function(gl,texture) {
 	return {
 		Terrain: function(textureAtlas) {
 			this.textureAtlas = textureAtlas;
+			this.cubes = [];
 			this.vertices = [];
 			this.normals = [];
 			this.texCoords = [];
@@ -15,6 +16,7 @@ define(["gl","texture"], function(gl,texture) {
 			this.numVertices = function() { return this.indices.length; };
 			
 			this.generate = function(world) {
+				this.cubes = world;
 				// Test for hidden faces and add blocks
 				for (var z=0; z<world.length; z++) {
 					for (var y=0; y<world[z].length; y++) {
@@ -54,7 +56,6 @@ define(["gl","texture"], function(gl,texture) {
 				gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
 			}
 
 			/** Add block to terrain (modifies vertices, normals, texCoords) 

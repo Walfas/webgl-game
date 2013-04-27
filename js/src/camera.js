@@ -4,7 +4,7 @@ define(["glmatrix", "data"], function(glmat, data) {
 			this.matrix = glmat.mat4.create();
 			glmat.mat4.identity(this.matrix);
 
-			this.theta = [Math.PI/2, 0.0, 0.0]; // Rotation about X and Z axes
+			this.theta = [-Math.PI/2, 0.0, 0.0]; // Rotation about X and Z axes
 			this.center = [0, 0, 0];
 			this.currentDistance = 1.0;
 			this.desiredDistance = this.currentDistance;
@@ -15,7 +15,21 @@ define(["glmatrix", "data"], function(glmat, data) {
 			this.zoomWeight = 0.1;
 
 			this.checkCollision = function(env) {
-				
+				for (var d=0.5; d<this.desiredDistance+1.0; d+=0.5) {
+					var p = this.sphericalToCartesian(this.center,d,this.theta);
+					for (var i=0; i<3; i++)
+						p[i] = Math.floor(p[i]);
+					if (p[2] < 0 || p[2] >= env.length || 
+					    p[1] < 0 || p[1] >= env[p[2]].length ||
+					    p[0] < 0 || p[0] >= env[p[2]][p[1]].length)
+						break;
+
+					if (env[p[2]][p[1]][p[0]]) {
+						this.currentDistance = d-0.5;
+						return true;
+					}
+				}
+				return false;
 			}
 
 			this.moveCenter = function(pos) {
@@ -52,9 +66,12 @@ define(["glmatrix", "data"], function(glmat, data) {
 				];
 			}
 
-			this.updateMatrix = function() {
-				this.currentDistance *= 1-this.zoomWeight; 
-				this.currentDistance += this.zoomWeight*this.desiredDistance;
+			this.updateMatrix = function(env) {
+				if (env && !this.checkCollision(env)) {
+					this.currentDistance *= 1-this.zoomWeight; 
+					this.currentDistance += this.zoomWeight*this.desiredDistance;
+				}
+
 				var pos = this.sphericalToCartesian(this.center, this.currentDistance, this.theta);
 				glmat.mat4.lookAt(this.matrix, pos, this.center, this.up);
 			}

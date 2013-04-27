@@ -26,7 +26,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "cam
 				}
 
 				this.lights = [];
-				this.lights[0] = new light.PointLight([1.0, 0.5, 0.0]);
+				this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [8,8,8]);
 				this.camera = new camera.Camera();
 				//this.theta = [-Math.PI/2, 0.0, 0.0];
 				//this.scale = 1.0;
@@ -50,34 +50,17 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "cam
 			if (input.pressedKeys[87]) this.lights[0].position[1] += 0.1;
 			this.camera.moveCenter(this.lights[0].position);
 
-			//var viewMatrix = glmat.mat4.create();
-			//glmat.mat4.identity(viewMatrix);
 			if (input.rightClick) {
-			/*
-				this.theta[0] += input.mouseMove[1] * data.rotateSpeed;
-				this.theta[2] += input.mouseMove[0] * data.rotateSpeed;
-				this.theta[0] = this.theta[0].clamp(data.rotateLimits[0],data.rotateLimits[1]);
-			*/
 				var angleChange = [-input.mouseMove[1]*data.rotateSpeed, 0, input.mouseMove[0]*data.rotateSpeed];
 				this.camera.changeAngle(angleChange);
 			}
-			/*
-			glmat.mat4.rotateX(viewMatrix, viewMatrix, this.theta[0]);
-			glmat.mat4.rotateY(viewMatrix, viewMatrix, this.theta[1]);
-			glmat.mat4.rotateZ(viewMatrix, viewMatrix, this.theta[2]);
-			glmat.mat4.scale(viewMatrix, viewMatrix, [this.scale, this.scale, this.scale]);
-			*/
 
 			input.mouseMove = [0,0];
 			if (input.scroll) {
-			/*
-				this.scale += input.scroll * 0.1;
-				this.scale = this.scale.clamp(data.zoomLimits[0],data.zoomLimits[1]);
-				*/
 				this.camera.changeDistance(input.scroll);
 				input.scroll = 0;
 			}
-			this.camera.updateMatrix();
+			this.camera.updateMatrix(this.level.cubes);
 
 			data.world.m.vMatrix = this.camera.matrix;
 
