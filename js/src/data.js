@@ -1,48 +1,27 @@
-define(["gl", "glmatrix", "util", "text!shaders/vertex.shader", "text!shaders/fragment.shader"], 
-	function(gl, glmat, util, vShader, fShader){
-		program = util.initShader(vShader, fShader);
-		gl.useProgram(program);
+define(["gl", "glmatrix", "programs", "light"], 
+	function(gl, glmat, programs, light){
+		var data = programs;
 
-		var data = {
-			program: program,
-			background: [0.5, 0.5, 0.5, 1.0],
+		// Uniform array of PointLight structs in GLSL
+		data.world.u.Light = [];
+		for (var i=0; i<4; i++) {
+			var l = data.world.u.Light;
+			l[i] = {};
+			for (var key in new light.PointLight()) {
+				l[i][key] = gl.getUniformLocation(data.world.program, "uLight["+i+"]."+key);
+			}
+		}
 
-			pMatrix: glmat.mat4.create(),
-			mvMatrix: glmat.mat4.create(),
-			nMatrix: glmat.mat3.create(),
-
-			// Uniforms
-			uPMatrix: null,
-			uMVMatrix: null,
-			uNMatrix: null,
-		};
-
-		// Initialize projection and model view matrices
-		glmat.mat4.identity(data.pMatrix);
-		glmat.mat4.identity(data.mvMatrix);
-		glmat.mat3.identity(data.nMatrix);
-
-		data.aPosition = gl.getAttribLocation(program, "aPosition");
-		gl.enableVertexAttribArray(data.aPosition);
-
-		data.aTexture = gl.getAttribLocation(program, "aTexture");
-		gl.enableVertexAttribArray(data.aTexture);
-
-		data.aNormal = gl.getAttribLocation(program, "aNormal");
-		gl.enableVertexAttribArray(data.aNormal);
-
-		data.uPMatrix = gl.getUniformLocation(data.program, "uPMatrix");
-		data.uNMatrix = gl.getUniformLocation(data.program, "uNMatrix");
-		data.uMVMatrix = gl.getUniformLocation(data.program, "uMVMatrix");
-		data.uSampler = gl.getUniformLocation(data.program, "uSampler");
-
-		data.uAmbientColor = gl.getUniformLocation(data.program, "uAmbientColor");
-		data.uPointLightingLocation = gl.getUniformLocation(data.program, "uPointLightingLocation");
-		data.uPointLightingColor = gl.getUniformLocation(data.program, "uPointLightingColor");
+		data.background = [0.5, 0.5, 0.5, 1.0];
+		data.rotateSpeed = 0.01;
+		data.rotateLimits = [-0.6*Math.PI, -0.2*Math.PI];
+		data.zoomLimits = [0.5, 5.0];
 
 		gl.enable(gl.DEPTH_TEST);
 		//gl.enable(gl.CULL_FACE);
 		//gl.cullFace(gl.BACK);
+
+		gl.useProgram(data.world.program);
 		return data;
 	}
 );
