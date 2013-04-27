@@ -92,18 +92,18 @@ define(["gl","texture"], function(gl,texture) {
 				var n = [
 					[-1,  0,  0], // left
 					[ 1,  0,  0], // right
-					[ 0, -1,  0], // bottom
-					[ 0,  1,  0], // top
-					[ 0,  0, -1], // back
-					[ 0,  0,  1]  // front
+					[ 0, -1,  0], // front
+					[ 0,  1,  0], // back
+					[ 0,  0, -1], // bottom
+					[ 0,  0,  1]  // top
 				];
 
 				// Indices for vertices
 				var indices = [
-					[1, 6, 7, 2],
-					[5, 0, 3, 4],
+					[2, 1, 6, 7],
+					[0, 3, 4, 5],
 					[3, 2, 7, 4],
-					[5, 6, 1, 0],
+					[1, 0, 5, 6],
 					[6, 5, 4, 7],
 					[0, 1, 2, 3]
 				];
@@ -138,9 +138,9 @@ define(["gl","texture"], function(gl,texture) {
 					if (!Array.isArray(specialTile))
 						tileNum = specialTile; // Reference to different tile
 					switch(faceNum) {
-					case 2: tileNum = specialTile[3]; break; // under
-					case 3: tileNum = specialTile[2]; break; // top
-					case 5: tileNum = specialTile[0]; break; // front
+					case 2: tileNum = specialTile[0]; break; // front
+					case 4: tileNum = specialTile[3]; break; // under
+					case 5: tileNum = specialTile[2]; break; // top
 					default: tileNum = specialTile[1]; break; // side
 					}
 				}
