@@ -39,19 +39,18 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 					}
 				}
 			}
-			cubes[0][0][0] = 0;
 
 			this.lights = [];
-			//this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,-1,1]);
-			this.lights[0] = new light.PointLight([0.0, 0.0, 0.0], [0,-1,1]);
+			this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,0,0]);
 			this.lights[1] = new light.PointLight([0.0, 0.0, 1.0], [8,8,8]);
 			this.camera = new camera.Camera();
+			this.ambient = [0,0,0];
 
 			this.level.generate(cubes);
 
 			this.sprites = new sprites.Sprites(texture.sprites);
 			this.sprites.addSprite(3, [0,0,1]);
-			this.sprites.generate();
+			this.sprites.update();
 
 			tick();
 		}
@@ -64,7 +63,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			gl.uniformMatrix4fv(data.world.u.VMatrix, false, data.world.m.vMatrix);
 			gl.uniformMatrix4fv(data.world.u.PMatrix, false, data.world.m.pMatrix);
 
-			gl.uniform3fv(data.world.u.AmbientColor, [1,1,1]);
+			gl.uniform3fv(data.world.u.AmbientColor, this.ambient);
 
 			// Bind buffers
 			gl.enableVertexAttribArray(data.world.a.Position);
@@ -121,11 +120,14 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			gl.useProgram(data.sprites.program);
 			data.world.m.vMatrix = this.camera.matrix;
 
+			this.sprites.moveSprite(0, this.lights[0].position);
+			this.sprites.update();
+
 			gl.uniformMatrix4fv(data.sprites.u.MMatrix, false, data.world.m.mMatrix);
 			gl.uniformMatrix4fv(data.sprites.u.VMatrix, false, data.world.m.vMatrix);
 			gl.uniformMatrix4fv(data.sprites.u.PMatrix, false, data.world.m.pMatrix);
 
-			gl.uniform3fv(data.sprites.u.AmbientColor, [1,1,1]);
+			gl.uniform3fv(data.sprites.u.AmbientColor, this.ambient);
 			gl.uniform3fv(data.sprites.u.CamPos, this.camera.pos);
 
 			// Bind buffers
@@ -175,40 +177,6 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			renderWorld();
 			renderSprites();
-
-/*
-			var objPos = [0,0,0];
-
-			var objToCam = glmat.vec3.create();
-			glmat.vec3.sub(objToCam, this.camera.pos, objPos);
-			var objToCamProj = glmat.vec3.clone(objToCam);
-			objToCamProj[2] = 0;
-			glmat.vec3.normalize(objToCamProj, objToCamProj);
-
-			var look = glmat.vec3.create(); 
-			glmat.vec3.sub(look, this.camera.pos, objPos);
-			glmat.vec3.normalize(look, look);
-			look = [0,-1,0];
-
-			var upAux = glmat.vec3.create(); 
-			glmat.vec3.cross(upAux, look, objToCamProj);
-			glmat.vec3.normalize(upAux,upAux);
-			var angleCosine = glmat.vec3.dot(look, objToCamProj);
-
-			var vMat = glmat.mat4.create();
-			glmat.mat4.rotate(vMat, vMat, Math.acos(angleCosine), upAux);
-
-			glmat.vec3.normalize(objToCam, objToCam);
-			angleCosine = glmat.vec3.dot(objToCamProj, objToCam);
-			if (objToCam[2] < 0)
-				glmat.mat4.rotate(vMat, vMat, Math.acos(angleCosine), [1,0,0]);
-			else
-				glmat.mat4.rotate(vMat, vMat, -Math.acos(angleCosine), [1,0,0]);
-
-			gl.uniformMatrix4fv(data.world.u.MMatrix, false, vMat);
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
-			gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 24);
-			*/
 		}
 
 		function tick() {

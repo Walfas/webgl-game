@@ -15,7 +15,7 @@ define(["gl","texture"], function(gl,texture) {
 
 			this.numVertices = function() { return this.indices.length; };
 
-			this.generate = function() {
+			this.update = function() {
 				// Initialize buffer data
 				gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexObject);
 				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);

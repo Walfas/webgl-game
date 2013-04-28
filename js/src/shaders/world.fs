@@ -32,7 +32,7 @@ float unpack(vec4 color)
 void main(void) {
 	vec3 normal = normalize(vWorldNormal);
 	vec4 texColor = texture2D(uSampler, vec2(vTexture.s, vTexture.t));
-	if (texColor.a < 0.1)
+	if (texColor.a < 0.1) // Transparent textures
 		discard;
 
 	vec3 color = uAmbientColor;
@@ -55,26 +55,14 @@ void main(void) {
 		color += l*a*uLight[i].color;
 	}
 
-	vec3 depth = vPosition.xyz / vPosition.w;
-	depth.z = length(vWorldVertex.xyz - uLight[0].position) * LinearDepthConstant;
+	//vec3 depth = vPosition.xyz / vPosition.w;
+	//depth.z = length(vWorldVertex.xyz - uLight[0].position) * LinearDepthConstant;
 	float shadow = 1.0;
 
-	depth.z *= 0.96; // Offset depth 
-	if (depth.z > unpack(texture2D(uDepthMap, depth.xy)))
-		shadow *= 0.5;
+	//depth.z *= 0.96; // Offset depth 
+	//if (depth.z > unpack(texture2D(uDepthMap, depth.xy)))
+		//shadow *= 0.5;
 
 	gl_FragColor = clamp(vec4(texColor.rgb*color*shadow, texColor.a), 0.0, 1.0);
-
-/*
-	vec4 fragmentColor = texture2D(uSampler, vec2(vTexture.s, vTexture.t));
-	if (fragmentColor.a < 0.1) // Transparent textures
-		discard;
-
-	vec3 lightDirection = normalize(uPointLightingLocation - vPosition.xyz);
-	float directionalLightWeighting = max(dot(normalize(vTransformedNormal), lightDirection), 0.0);
-	vec3 lightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
-
-	gl_FragColor = vec4(fragmentColor.rgb * lightWeighting, fragmentColor.a);	
-*/
 }
 
