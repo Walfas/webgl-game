@@ -104,58 +104,45 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "cam
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
 			gl.drawElements(gl.TRIANGLES, this.level.numVertices(), gl.UNSIGNED_SHORT, 0);
 
-			var objPos = [0,0.5,0];
-
-			var vMat = data.world.m.vMatrix;
-			var rsx = glmat.vec3.fromValues(vMat[0], vMat[4], vMat[8]);
-			var rsy = glmat.vec3.fromValues(vMat[1], vMat[5], vMat[9]);
-			var rsz = glmat.vec3.fromValues(vMat[2], vMat[6], vMat[10]);
-			vMat[0] = glmat.vec3.length(rsx);
-			vMat[5] = glmat.vec3.length(rsy);
-			vMat[10] = glmat.vec3.length(rsz);
-
-
-			gl.uniformMatrix4fv(data.world.u.VMatrix, false, vMat);
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
-			gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 24);
-			return;
+			var objPos = [0,0,0];
 
 /*
-			var n = glmat.vec3.create();
-			glmat.vec3.sub(n, this.camera.pos, objPos);
-			glmat.vec3.normalize(n, n);
+			var at = glmat.vec3.create();
+			glmat.vec3.sub(at, this.camera.pos, objPos);
+			glmat.vec3.normalize(at, at);
 			var right = glmat.vec3.create();
-			glmat.vec3.cross(right, this.camera.up, n);
+			glmat.vec3.cross(right, this.camera.up, at);
 			glmat.vec3.normalize(right, right);
 			var up = glmat.vec3.create();
-			glmat.vec3.cross(up, n, right);
+			glmat.vec3.cross(up, at, right);
 			glmat.vec3.normalize(up, up);
 
 			var m = glmat.mat4.create();
-			glmat.mat4.identity(m);
 			m[0] = right[0];
 			m[4] = right[1];
 			m[8] = right[2];
 			m[1] = up[0];
 			m[5] = up[1];
 			m[9] = up[2];
-			m[2] = n[0];
-			m[6] = n[1];
-			m[10] = n[2];
+			m[2] = at[0];
+			m[6] = at[1];
+			m[10] = at[2];
 			m[3] = objPos[0];
 			m[7] = objPos[1];
 			m[11] = objPos[2];
 			m[12] = m[13] = m[14] = 0;
 			m[15] = 1;
 
-			glmat.mat4.transpose(m,m);
-			//glmat.mat4.mul(m, m, this.camera.matrix);
-			gl.uniformMatrix4fv(data.world.u.VMatrix, false, m);
+			//glmat.mat4.transpose(m,m);
+			//glmat.mat4.mul(m, this.camera.matrix, m);
+			gl.uniformMatrix4fv(data.world.u.MMatrix, false, m);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
-			gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+			gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 24);
+			// bottom:48 / front:24
 
 			return;
 			*/
+
 			var objToCam = glmat.vec3.create();
 			glmat.vec3.sub(objToCam, this.camera.pos, objPos);
 			var objToCamProj = glmat.vec3.clone(objToCam);
@@ -165,6 +152,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "cam
 			var look = glmat.vec3.create(); 
 			glmat.vec3.sub(look, this.camera.pos, objPos);
 			glmat.vec3.normalize(look, look);
+			look = [0,-1,0];
 
 			var upAux = glmat.vec3.create(); 
 			glmat.vec3.cross(upAux, look, objToCamProj);
@@ -172,23 +160,16 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "cam
 			var angleCosine = glmat.vec3.dot(look, objToCamProj);
 
 			var vMat = glmat.mat4.create();
-			//glmat.mat4.identity(vMat);
-			if ((angleCosine < 0.9999) && (angleCosine > -0.9999)) {
-				glmat.mat4.rotate(vMat, this.camera.matrix, -Math.acos(angleCosine), upAux);
-				//glmat.mat4.mul(vMat, vMat, this.camera.matrix);
-			}
+			glmat.mat4.rotate(vMat, vMat, Math.acos(angleCosine), upAux);
 
 			glmat.vec3.normalize(objToCam, objToCam);
 			angleCosine = glmat.vec3.dot(objToCamProj, objToCam);
-			//glmat.mat4.rotateZ(vMat, vMat, this.camera.theta[2]-Math.PI/2);
-			//if ((angleCosine < 0.9999) && (angleCosine > -0.9999)) {
-				//if (objToCam[1] < 0)
-					//glmat.mat4.rotate(vMat, vMat, -Math.acos(angleCosine), [0,0,1]);
-				//else
-					//glmat.mat4.rotate(vMat, vMat, -Math.acos(angleCosine), [0,0,-1]);
-			//}
+			if (objToCam[2] < 0)
+				glmat.mat4.rotate(vMat, vMat, Math.acos(angleCosine), [1,0,0]);
+			else
+				glmat.mat4.rotate(vMat, vMat, -Math.acos(angleCosine), [1,0,0]);
 
-			gl.uniformMatrix4fv(data.world.u.VMatrix, false, vMat);
+			gl.uniformMatrix4fv(data.world.u.MMatrix, false, vMat);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
 			gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 24);
 		}
