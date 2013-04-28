@@ -106,6 +106,20 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "cam
 
 			var objPos = [0,0.5,0];
 
+			var vMat = data.world.m.vMatrix;
+			var rsx = glmat.vec3.fromValues(vMat[0], vMat[4], vMat[8]);
+			var rsy = glmat.vec3.fromValues(vMat[1], vMat[5], vMat[9]);
+			var rsz = glmat.vec3.fromValues(vMat[2], vMat[6], vMat[10]);
+			vMat[0] = glmat.vec3.length(rsx);
+			vMat[5] = glmat.vec3.length(rsy);
+			vMat[10] = glmat.vec3.length(rsz);
+
+
+			gl.uniformMatrix4fv(data.world.u.VMatrix, false, vMat);
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
+			gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 24);
+			return;
+
 /*
 			var n = glmat.vec3.create();
 			glmat.vec3.sub(n, this.camera.pos, objPos);
@@ -166,7 +180,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "light", "cam
 
 			glmat.vec3.normalize(objToCam, objToCam);
 			angleCosine = glmat.vec3.dot(objToCamProj, objToCam);
-			glmat.mat4.rotateZ(vMat, vMat, this.camera.theta[2]-Math.PI/2);
+			//glmat.mat4.rotateZ(vMat, vMat, this.camera.theta[2]-Math.PI/2);
 			//if ((angleCosine < 0.9999) && (angleCosine > -0.9999)) {
 				//if (objToCam[1] < 0)
 					//glmat.mat4.rotate(vMat, vMat, -Math.acos(angleCosine), [0,0,1]);
