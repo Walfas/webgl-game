@@ -14,7 +14,6 @@ struct PointLight
 
 varying vec4 vWorldVertex;
 varying vec3 vWorldNormal;
-varying vec3 vViewVec;
 varying vec4 vPosition;
 varying vec2 vTexture;
 

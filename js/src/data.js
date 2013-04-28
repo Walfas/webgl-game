@@ -3,14 +3,8 @@ define(["gl", "glmatrix", "programs", "light"],
 		var data = programs;
 
 		// Uniform array of PointLight structs in GLSL
-		data.world.u.Light = [];
-		for (var i=0; i<4; i++) {
-			var l = data.world.u.Light;
-			l[i] = {};
-			for (var key in new light.PointLight()) {
-				l[i][key] = gl.getUniformLocation(data.world.program, "uLight["+i+"]."+key);
-			}
-		}
+		setLightUniforms(data.world);
+		setLightUniforms(data.sprites);
 
 		data.background = [0.5, 0.5, 0.5, 1.0];
 		data.rotateSpeed = 0.01;
@@ -21,6 +15,18 @@ define(["gl", "glmatrix", "programs", "light"],
 
 		gl.useProgram(data.world.program);
 		return data;
+
+		function setLightUniforms(prog) {
+			// Uniform array of PointLight structs in GLSL
+			prog.u.Light = [];
+			for (var i=0; i<4; i++) {
+				var l = prog.u.Light;
+				l[i] = {};
+				for (var key in new light.PointLight()) {
+					l[i][key] = gl.getUniformLocation(prog.program, "uLight["+i+"]."+key);
+				}
+			}
+		}
 	}
 );
 

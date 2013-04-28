@@ -5,14 +5,12 @@ attribute vec2 aTexture;
 uniform mat4 uMMatrix;
 uniform mat4 uVMatrix;
 uniform mat4 uPMatrix;
-uniform mat3 uNMatrix;
 
 uniform mat4 uLightVMatrix;
 uniform mat4 uLightPMatrix;
 
 varying vec4 vWorldVertex;
 varying vec3 vWorldNormal;
-varying vec3 vViewVec;
 varying vec4 vPosition;
 varying vec2 vTexture;
 
@@ -23,7 +21,6 @@ void main(void) {
 
 	vTexture = aTexture;
 	vWorldNormal = normalize(mat3(uMMatrix) * aNormal);
-	vViewVec = normalize(-viewVertex.xyz);
 
 	vPosition = uLightPMatrix * uLightVMatrix * vWorldVertex;
 }

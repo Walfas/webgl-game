@@ -1,9 +1,10 @@
 define([
 	"gl", "glmatrix",
 	"text!shaders/world.vs", "text!shaders/world.fs", 
+	"text!shaders/billboard.vs", 
 	"text!shaders/depth.vs", "text!shaders/depth.fs"
 	], 
-	function(gl, glmat, worldV, worldF, depthV, depthF) {
+	function(gl, glmat, worldV, worldF, billboardV, depthV, depthF) {
 		/** Returns compiled shader */
 		this.getShader = function(type, text) {
 			var shader = gl.createShader(type);
@@ -73,7 +74,6 @@ define([
 					"Normal"
 				],
 				[
-					"NMatrix", 
 					"PMatrix", 
 					"MMatrix", 
 					"VMatrix", 
@@ -87,9 +87,27 @@ define([
 				{
 					pMatrix: 4,
 					mMatrix: 4,
-					vMatrix: 4,
-					nMatrix: 3
+					vMatrix: 4
 				}
+			),
+			sprites: this.newProgram(
+				billboardV, worldF, 
+				[
+					"Position", 
+					"Offset",
+					"Texture"
+				],
+				[
+					"CamPos", 
+					"PMatrix", 
+					"MMatrix", 
+					"VMatrix", 
+					"Sampler", 
+					"AmbientColor", 
+					"DepthMap", 
+					"Light"
+				],
+				{}
 			),
 			depth: this.newProgram(
 				depthV, depthF,
