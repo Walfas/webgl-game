@@ -15,6 +15,24 @@ define(["gl","texture"], function(gl,texture) {
 
 			this.numVertices = function() { return this.indices.length; };
 			
+			this.collision = function(x,y,z) {
+				if (x instanceof Array) {
+					z = x[2];
+					y = x[1];
+					x = x[0];
+				}
+				x = Math.floor(x);
+				y = Math.floor(y);
+				z = Math.floor(z);
+
+				if (z < 0 || z >= this.cubes.length || 
+					y < 0 || y >= this.cubes[z].length ||
+					x < 0 || x >= this.cubes[z][y].length)
+					return false;
+
+				return this.cubes[z][y][x];
+			}
+
 			this.generate = function(world) {
 				this.cubes = world;
 				// Test for hidden faces and add blocks

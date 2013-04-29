@@ -98,6 +98,7 @@ define([
 					"Texture"
 				],
 				[
+					"Counter", 
 					"CamPos", 
 					"PMatrix", 
 					"MMatrix", 

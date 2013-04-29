@@ -5,6 +5,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 		texture.sprites = null;
 		this.level = null;
 		this.sprites = null;
+		this.counter = 0;
 		
 		checkLoaded();
 		function checkLoaded() {
@@ -14,7 +15,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 				return;
 			}
 			if (!texture.sprites) {
-				texture.sprites = new texture.TextureAtlas("img/jolicraft.png", 16);
+				texture.sprites = new texture.TextureAtlas("img/oryx.png", 8);
 				window.setTimeout(checkLoaded, 100);
 				return;
 			}
@@ -26,12 +27,12 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			//DEBUG
 			var cubes = [[[]]];
-			for (var z=0; z<16; z++) {
+			for (var z=0; z<1; z++) {
 				cubes[z] = [];
 				for (var y=0; y<16; y++) {
 					cubes[z][y] = [];
 					for (var x=0; x<16; x++) {
-						if(Math.random() > 0.05) {
+						if(Math.random() > 0.5) {
 							cubes[z][y][x] = 0;
 							continue;
 						}
@@ -44,12 +45,13 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,0,0]);
 			this.lights[1] = new light.PointLight([0.0, 0.0, 1.0], [8,8,8]);
 			this.camera = new camera.Camera();
-			this.ambient = [0,0,0];
+			this.ambient = [0.5, 0.5, 0.5];
 
 			this.level.generate(cubes);
 
 			this.sprites = new sprites.Sprites(texture.sprites);
-			this.sprites.addSprite(3, [0,0,1]);
+			this.sprites.addSprite(14, [0,0,1]);
+			this.player = this.sprites.sprites[0];
 			this.sprites.update();
 
 			tick();
@@ -99,10 +101,22 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 		}
 
 		function handleInputs() {
-			if (input.pressedKeys[65]) this.lights[0].position[0] -= 0.1;
-			if (input.pressedKeys[68]) this.lights[0].position[0] += 0.1;
-			if (input.pressedKeys[83]) this.lights[0].position[1] -= 0.1;
-			if (input.pressedKeys[87]) this.lights[0].position[1] += 0.1;
+			var inputMask = 0;
+			if (input.pressedKeys[87]) inputMask += 1; // W
+			if (input.pressedKeys[65]) inputMask += 2; // A
+			if (input.pressedKeys[83]) inputMask += 4; // S
+			if (input.pressedKeys[68]) inputMask += 8; // D
+
+			switch(inputMask) {
+			case  1: this.player.turnAndMove(this.level, 0); break;
+			case  2: this.player.turnAndMove(this.level, Math.PI/2); break;
+			case  3: this.player.turnAndMove(this.level, Math.PI/4); break;
+			case  4: this.player.turnAndMove(this.level, Math.PI); break;
+			case  6: this.player.turnAndMove(this.level, 3/4*Math.PI); break;
+			case  8: this.player.turnAndMove(this.level,-Math.PI/2); break;
+			case  9: this.player.turnAndMove(this.level,-Math.PI/4); break;
+			case 12: this.player.turnAndMove(this.level, 5/4*Math.PI); break;
+			}
 
 			if (input.rightClick) {
 				var angleChange = [-input.mouseMove[1]*data.rotateSpeed, 0, input.mouseMove[0]*data.rotateSpeed];
@@ -117,16 +131,21 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 		}
 
 		function renderSprites() {
+			this.counter++;
+
 			gl.useProgram(data.sprites.program);
 			data.world.m.vMatrix = this.camera.matrix;
 
-			this.sprites.moveSprite(0, this.lights[0].position);
+			//this.sprites.moveSprite(0, this.lights[0].position);
+			this.sprites.sprites[0].theta = this.camera.theta[2];
+			//this.sprites.sprites[0].moveTo(this.lights[0].position);
 			this.sprites.update();
 
 			gl.uniformMatrix4fv(data.sprites.u.MMatrix, false, data.world.m.mMatrix);
 			gl.uniformMatrix4fv(data.sprites.u.VMatrix, false, data.world.m.vMatrix);
 			gl.uniformMatrix4fv(data.sprites.u.PMatrix, false, data.world.m.pMatrix);
 
+			gl.uniform1f(data.sprites.u.Counter, this.counter);
 			gl.uniform3fv(data.sprites.u.AmbientColor, this.ambient);
 			gl.uniform3fv(data.sprites.u.CamPos, this.camera.pos);
 
@@ -172,7 +191,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			handleInputs();
 
-			this.camera.moveCenter(this.lights[0].position);
+			this.camera.moveCenter(this.sprites.sprites[0].pos);
 			this.camera.updateMatrix(this.level.cubes);
 
 			renderWorld();
