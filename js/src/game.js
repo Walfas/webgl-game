@@ -32,7 +32,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 				for (var y=0; y<16; y++) {
 					cubes[z][y] = [];
 					for (var x=0; x<16; x++) {
-						if(Math.random() > 0.5) {
+						if(Math.random() > 0.3) {
 							cubes[z][y][x] = 0;
 							continue;
 						}
@@ -160,6 +160,10 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.sprites.offsetObject);
 			gl.vertexAttribPointer(data.sprites.a.Offset, 3, gl.FLOAT, false, 0, 0);
 
+			gl.enableVertexAttribArray(data.sprites.a.Moving);
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.sprites.movingObject);
+			gl.vertexAttribPointer(data.sprites.a.Moving, 1, gl.FLOAT, false, 0, 0);
+
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, this.sprites.textureAtlas.texture);
 			gl.uniform1i(data.sprites.u.Sampler, 0);
@@ -178,6 +182,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			gl.disableVertexAttribArray(data.sprites.a.Position);
 			gl.disableVertexAttribArray(data.sprites.a.Texture);
 			gl.disableVertexAttribArray(data.sprites.a.Offset);
+			gl.disableVertexAttribArray(data.sprites.a.Moving);
 		}
 
 		function display() {
