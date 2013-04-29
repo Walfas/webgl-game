@@ -10,7 +10,7 @@ define(["glmatrix"], function(glmat) {
 			this.pos = [0, 0, 0];
 
 			this.thetaLimits = [-0.6*Math.PI, -0.2*Math.PI];
-			this.distanceLimits = [1.0, 15.0];
+			this.distanceLimits = [2.0, 15.0];
 			this.zoomWeight = 0.1;
 
 			this.currentDistance = (this.distanceLimits[0]+this.distanceLimits[1])/2;

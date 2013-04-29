@@ -45,12 +45,12 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,0,0]);
 			this.lights[1] = new light.PointLight([0.0, 0.0, 1.0], [8,8,8]);
 			this.camera = new camera.Camera();
-			this.ambient = [0.5, 0.5, 0.5];
+			this.ambient = [1,1,1];
 
 			this.level.generate(cubes);
 
 			this.sprites = new sprites.Sprites(texture.sprites);
-			this.sprites.addSprite(14, [0,0,1]);
+			this.sprites.addSprite(14, [0,0,0]);
 			this.player = this.sprites.sprites[0];
 			this.sprites.update();
 
@@ -136,9 +136,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			gl.useProgram(data.sprites.program);
 			data.world.m.vMatrix = this.camera.matrix;
 
-			//this.sprites.moveSprite(0, this.lights[0].position);
 			this.sprites.sprites[0].theta = this.camera.theta[2];
-			//this.sprites.sprites[0].moveTo(this.lights[0].position);
 			this.sprites.update();
 
 			gl.uniformMatrix4fv(data.sprites.u.MMatrix, false, data.world.m.mMatrix);
@@ -191,7 +189,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			handleInputs();
 
-			this.camera.moveCenter(this.sprites.sprites[0].pos);
+			this.camera.moveCenter(this.player.pos);
 			this.camera.updateMatrix(this.level.cubes);
 
 			renderWorld();

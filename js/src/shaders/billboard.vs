@@ -35,7 +35,7 @@ void main(void) {
 
 	vec3 vR = offset.x*right;
 	vec3 vU = offset.z*up;
-	vec4 d = vec4(vR+vU-look*0.1, 0.0);
+	vec4 d = vec4(vR+vU+look*0.5, 0.0);
 	vPosition = vWorldVertex = uMMatrix * (vec4(aPosition, 1.0) + d);
 
 	vWorldNormal = look;

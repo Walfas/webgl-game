@@ -24,12 +24,20 @@ define(["gl","glmatrix","texture"], function(gl,glmat,texture) {
 			this.moving = true;
 		}
 		this.checkCollision = function(env) {
-			if (env.collision(this.pos[0]+this.vel[0],this.pos[1],this.pos[2]))
-				this.vel[0] = 0;
-			if (env.collision(this.pos[0],this.pos[1]+this.vel[1],this.pos[2]))
-				this.vel[1] = 0;
-			if (env.collision(this.pos[0],this.pos[1],this.pos[2]+this.vel[2]))
-				this.vel[2] = 0;
+			for (var i=0; i<3; i++) {
+				if (this.vel[i] == 0)
+					continue;
+
+				if (this.vel[i] > 0)
+					padding = 0.5;
+				else 
+					padding = -0.5;
+				
+				var testPos = this.pos.slice(0);
+				testPos[i] += this.vel[i] + padding;
+				if (env.collision(testPos))
+					this.vel[i] = 0;
+			}
 		}
 	}
 
