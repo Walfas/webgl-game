@@ -4,6 +4,7 @@ attribute vec3 aPosition;
 attribute vec3 aOffset;
 attribute vec2 aTexture;
 attribute float aMoving;
+attribute float aFlipped;
 
 uniform vec3 uCamPos;
 uniform mat4 uMMatrix;
@@ -26,7 +27,6 @@ void main(void) {
 	vec3 up = normalize(cross(look, right));
 
 	vec3 offset = aOffset;
-
 	if (aMoving > 0.5 && offset.z < 0.5) {
 		float t = mod(1.5*uCounter/M_PI,2.0*M_PI);
 		t = (abs(t-M_PI)-0.5*M_PI)*0.25;
@@ -37,19 +37,22 @@ void main(void) {
 		offset.x = x*c - z*s;
 		offset.z = x*s + z*c;
 	}
+	else {
+		float t = mod(uCounter/M_PI,2.0*M_PI);
 
-	float t = mod(uCounter/M_PI,2.0*M_PI);
+		vec3 mult = vec3(0.05, 0.0, 0.13);
+		if (offset.x < 0.0)
+			mult.x *= -1.0;
+		if (offset.z > 0.0)
+			mult.z *= -1.0;
+		else
+			mult.z = 0.0;
 
-	vec3 mult = vec3(0.05, 0.0, 0.13);
-	if (offset.x < 0.0)
-		mult.x *= -1.0;
-	if (offset.z > 0.0)
-		mult.z *= -1.0;
-	else
-		mult.z = 0.0;
-
-	offset.x += sin(t)*mult.x;
-	offset.z += cos(t)*mult.z;
+		offset.x += sin(t)*mult.x;
+		offset.z += cos(t)*mult.z;
+	}
+	if (aFlipped > 0.5)
+		offset.x *= -1.0;
 
 	vec3 vR = offset.x*right;
 	vec3 vU = offset.z*up;

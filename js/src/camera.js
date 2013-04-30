@@ -4,12 +4,13 @@ define(["glmatrix"], function(glmat) {
 			this.matrix = glmat.mat4.create();
 			glmat.mat4.identity(this.matrix);
 
-			this.theta = [-Math.PI/2, 0.0, Math.PI/2]; // Rotation about X and Z axes
+			this.theta = [1.7*Math.PI, 0.0, 0.5*Math.PI]; // Rotation about X and Z axes
 			this.center = [0, 0, 0];
 			this.up = [0, 0, 1];
 			this.pos = [0, 0, 0];
 
-			this.thetaLimits = [-0.6*Math.PI, -0.2*Math.PI];
+		
+			this.thetaLimits = [1.4*Math.PI, 1.8*Math.PI];
 			this.distanceLimits = [2.0, 15.0];
 			this.zoomWeight = 0.1;
 
@@ -38,8 +39,12 @@ define(["glmatrix"], function(glmat) {
 				return false;
 			}
 
-			this.moveCenter = function(pos) {
-				this.center = pos;
+			this.moveCenter = function(pos, offset) {
+				this.center = pos.slice(0);
+				if (offset) {
+					for (var i=0; i<3; i++)
+						this.center[i] += offset[i];
+				}
 			}
 
 			this.changeAngle = function(dTheta) {
@@ -73,6 +78,12 @@ define(["glmatrix"], function(glmat) {
 			}
 
 			this.updateMatrix = function(env) {
+				for (var i=0; i<3; i++) {
+					if (this.theta[i] < 0)
+						this.theta[i] += 2*Math.PI;
+					else if (this.theta[i] > 2*Math.PI)
+						this.theta[i] -= 2*Math.PI;
+				}
 				if (env && !this.checkCollision(env)) {
 					this.currentDistance *= 1-this.zoomWeight; 
 					this.currentDistance += this.zoomWeight*this.desiredDistance;

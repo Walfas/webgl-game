@@ -39,8 +39,8 @@ define(["gl"], function(gl) {
 					this.tileSizeNormalized * (tileNum % this.tilesPerRow) + this.paddingNormalized,
 					this.tileSizeNormalized * Math.floor(tileNum / this.tilesPerRow) + this.paddingNormalized,
 				];
-				stRange[2] = stRange[0] + this.tileSizeNormalized - this.paddingNormalized;
-				stRange[3] = stRange[1] + this.tileSizeNormalized - this.paddingNormalized;
+				stRange[2] = stRange[0] + this.tileSizeNormalized - this.paddingNormalized*1.5;
+				stRange[3] = stRange[1] + this.tileSizeNormalized - this.paddingNormalized*1.5;
 				return stRange;
 			}
 

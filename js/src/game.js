@@ -1,7 +1,7 @@
 require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "light", "camera", "input"], 
 	function(canvas, gl, glmat, data, texture, terrain, sprites, light, camera, input) {
 
-		texture.land = new texture.TextureAtlas("img/jolicraft.png", 16);
+		texture.land = new texture.TextureAtlas("img/ldfaithful.png", 8);
 		texture.sprites = null;
 		this.level = null;
 		this.sprites = null;
@@ -51,6 +51,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			this.sprites = new sprites.Sprites(texture.sprites);
 			this.sprites.addSprite(14, [0,0,0]);
+			//this.sprites.addSprite(Math.floor(Math.random()*256), [0,0,0]);
 			this.player = this.sprites.sprites[0];
 			this.sprites.update();
 
@@ -67,37 +68,28 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			gl.uniform3fv(data.world.u.AmbientColor, this.ambient);
 
+			updateLights(data.world);
 			// Bind buffers
-			gl.enableVertexAttribArray(data.world.a.Position);
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.vertexObject);
-			gl.vertexAttribPointer(data.world.a.Position, 3, gl.FLOAT, false, 0, 0);
-
-			gl.enableVertexAttribArray(data.world.a.Texture);
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.texCoordObject);
-			gl.vertexAttribPointer(data.world.a.Texture, 2, gl.FLOAT, false, 0, 0);
-
-			gl.enableVertexAttribArray(data.world.a.Normal);
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.level.normalObject);
-			gl.vertexAttribPointer(data.world.a.Normal, 3, gl.FLOAT, false, 0, 0);
+			attribSetup(data.world.a.Position, this.level.vertexObject, 3);
+			attribSetup(data.world.a.Texture, this.level.texCoordObject, 2);
+			attribSetup(data.world.a.Normal, this.level.normalObject, 3);
 
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, this.level.textureAtlas.texture);
 			gl.uniform1i(data.world.u.Sampler, 0);
 
-			for (var i=0; i<this.lights.length; i++) {
-				this.lights[i].update();
-				gl.uniform1f(data.world.u.Light[i].enabled, this.lights[i].enabled);
-				gl.uniform3fv(data.world.u.Light[i].attenuation, this.lights[i].attenuation);
-				gl.uniform3fv(data.world.u.Light[i].color, this.lights[i].color);
-				gl.uniform3fv(data.world.u.Light[i].position, this.lights[i].position);
-			}
-
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
 			gl.drawElements(gl.TRIANGLES, this.level.numVertices(), gl.UNSIGNED_SHORT, 0);
+		}
 
-			gl.disableVertexAttribArray(data.world.a.Position);
-			gl.disableVertexAttribArray(data.world.a.Texture);
-			gl.disableVertexAttribArray(data.world.a.Normal);
+		function updateLights(program) {
+			for (var i=0; i<this.lights.length; i++) {
+				this.lights[i].update();
+				gl.uniform1f(program.u.Light[i].enabled, this.lights[i].enabled);
+				gl.uniform3fv(program.u.Light[i].attenuation, this.lights[i].attenuation);
+				gl.uniform3fv(program.u.Light[i].color, this.lights[i].color);
+				gl.uniform3fv(program.u.Light[i].position, this.lights[i].position);
+			}
 		}
 
 		function handleInputs() {
@@ -109,13 +101,13 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			switch(inputMask) {
 			case  1: this.player.turnAndMove(this.level, 0); break;
-			case  2: this.player.turnAndMove(this.level, Math.PI/2); break;
-			case  3: this.player.turnAndMove(this.level, Math.PI/4); break;
+			case  2: this.player.flipped = 1; this.player.turnAndMove(this.level, Math.PI/2); break;
+			case  3: this.player.flipped = 1; this.player.turnAndMove(this.level, Math.PI/4); break;
 			case  4: this.player.turnAndMove(this.level, Math.PI); break;
-			case  6: this.player.turnAndMove(this.level, 3/4*Math.PI); break;
-			case  8: this.player.turnAndMove(this.level,-Math.PI/2); break;
-			case  9: this.player.turnAndMove(this.level,-Math.PI/4); break;
-			case 12: this.player.turnAndMove(this.level, 5/4*Math.PI); break;
+			case  6: this.player.flipped = 1; this.player.turnAndMove(this.level, 3/4*Math.PI); break;
+			case  8: this.player.flipped = 0; this.player.turnAndMove(this.level,-Math.PI/2); break;
+			case  9: this.player.flipped = 0; this.player.turnAndMove(this.level,-Math.PI/4); break;
+			case 12: this.player.flipped = 0; this.player.turnAndMove(this.level, 5/4*Math.PI); break;
 			}
 
 			if (input.rightClick) {
@@ -128,6 +120,14 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 				this.camera.changeDistance(-input.scroll);
 				input.scroll = 0;
 			}
+		}
+
+		function attribSetup(attrib, object, size, type) {
+			if (!type)
+				type = gl.FLOAT;
+			gl.enableVertexAttribArray(attrib);
+			gl.bindBuffer(gl.ARRAY_BUFFER, object);
+			gl.vertexAttribPointer(attrib, size, type, false, 0, 0);
 		}
 
 		function renderSprites() {
@@ -147,42 +147,21 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			gl.uniform3fv(data.sprites.u.AmbientColor, this.ambient);
 			gl.uniform3fv(data.sprites.u.CamPos, this.camera.pos);
 
+			updateLights(data.sprites);
+
 			// Bind buffers
-			gl.enableVertexAttribArray(data.sprites.a.Position);
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.sprites.vertexObject);
-			gl.vertexAttribPointer(data.sprites.a.Position, 3, gl.FLOAT, false, 0, 0);
-
-			gl.enableVertexAttribArray(data.sprites.a.Texture);
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.sprites.texCoordObject);
-			gl.vertexAttribPointer(data.sprites.a.Texture, 2, gl.FLOAT, false, 0, 0);
-
-			gl.enableVertexAttribArray(data.sprites.a.Offset);
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.sprites.offsetObject);
-			gl.vertexAttribPointer(data.sprites.a.Offset, 3, gl.FLOAT, false, 0, 0);
-
-			gl.enableVertexAttribArray(data.sprites.a.Moving);
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.sprites.movingObject);
-			gl.vertexAttribPointer(data.sprites.a.Moving, 1, gl.FLOAT, false, 0, 0);
+			attribSetup(data.sprites.a.Position, this.sprites.vertexObject, 3);
+			attribSetup(data.sprites.a.Texture, this.sprites.texCoordObject, 2);
+			attribSetup(data.sprites.a.Offset, this.sprites.offsetObject, 3);
+			attribSetup(data.sprites.a.Moving, this.sprites.movingObject, 1);
+			attribSetup(data.sprites.a.Flipped, this.sprites.flippedObject, 1);
 
 			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, this.sprites.textureAtlas.texture);
 			gl.uniform1i(data.sprites.u.Sampler, 0);
 
-			for (var i=0; i<this.lights.length; i++) {
-				this.lights[i].update();
-				gl.uniform1f(data.sprites.u.Light[i].enabled, this.lights[i].enabled);
-				gl.uniform3fv(data.sprites.u.Light[i].attenuation, this.lights[i].attenuation);
-				gl.uniform3fv(data.sprites.u.Light[i].color, this.lights[i].color);
-				gl.uniform3fv(data.sprites.u.Light[i].position, this.lights[i].position);
-			}
-
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.sprites.indexObject);
 			gl.drawElements(gl.TRIANGLES, this.sprites.numVertices(), gl.UNSIGNED_SHORT, 0);
-
-			gl.disableVertexAttribArray(data.sprites.a.Position);
-			gl.disableVertexAttribArray(data.sprites.a.Texture);
-			gl.disableVertexAttribArray(data.sprites.a.Offset);
-			gl.disableVertexAttribArray(data.sprites.a.Moving);
 		}
 
 		function display() {
@@ -194,7 +173,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			handleInputs();
 
-			this.camera.moveCenter(this.player.pos);
+			this.camera.moveCenter(this.player.pos, [0.0, 0.0, 0.5]);
 			this.camera.updateMatrix(this.level.cubes);
 
 			renderWorld();

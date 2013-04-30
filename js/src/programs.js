@@ -96,7 +96,8 @@ define([
 					"Position", 
 					"Offset",
 					"Texture",
-					"Moving"
+					"Moving",
+					"Flipped"
 				],
 				[
 					"Counter", 
