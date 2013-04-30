@@ -30,18 +30,15 @@ define(["canvas"], function(canvas) {
 		}
 	}
 
-	canvas.onmousewheel = function(event) {
-		var delta = 0;
-		if (!event) // IE
-			event = window.event;
-		if (event.wheelDelta) // IE/Opera
-			delta = event.wheelDelta/120;
-		else if (event.detail) { // Mozilla
-			delta = event.detail
-			console.log(event.detail);
-		}
+	var mousewheelevent=(/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel";
+	if (document.attachEvent) //if IE (and Opera depending on user setting)
+		document.attachEvent("on"+mousewheelevent, mousewheel)
+	else if (document.addEventListener) //WC3 browsers
+		document.addEventListener(mousewheelevent, mousewheel, false)
 
-		input.scroll = delta;
+	function mousewheel(e) {
+		var event = window.event || e;
+		input.scroll = event.detail ? -event.detail : event.wheelDelta;
 	}
 
 	document.onkeydown = function(event) {
