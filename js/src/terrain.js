@@ -154,8 +154,8 @@ define(["gl","texture"], function(gl,texture) {
 			this.addFaceTexCoords = function(tileNum,faceNum) {
 				if (this.specialTiles.hasOwnProperty(tileNum)) {
 					var specialTile = this.specialTiles[tileNum];
-					if (!Array.isArray(specialTile))
-						tileNum = specialTile; // Reference to different tile
+					if (!Array.isArray(specialTile))  
+						specialTile = this.specialTiles[this.specialTiles[tileNum]]; // Reference to different tile
 					switch(faceNum) {
 					case 2: tileNum = specialTile[0]; break; // front
 					case 4: tileNum = specialTile[3]; break; // under

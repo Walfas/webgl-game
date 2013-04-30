@@ -32,18 +32,19 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 				for (var y=0; y<16; y++) {
 					cubes[z][y] = [];
 					for (var x=0; x<16; x++) {
-						if(Math.random() > 0.3) {
+						if(Math.random() > 1.3) {
 							cubes[z][y][x] = 0;
 							continue;
 						}
-						cubes[z][y][x] = Math.floor(Math.random()*256);
+						//cubes[z][y][x] = Math.floor(Math.random()*256);
+						cubes[z][y][x] = y*16+x;
 					}
 				}
 			}
 
 			this.lights = [];
 			this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,0,0]);
-			this.lights[1] = new light.PointLight([0.0, 0.0, 1.0], [8,8,8]);
+			//this.lights[1] = new light.PointLight([0.0, 0.0, 1.0], [8,8,8]);
 			this.camera = new camera.Camera();
 			this.ambient = [1,1,1];
 
