@@ -9,6 +9,7 @@ define(["gl", "glmatrix", "programs", "light"],
 		//data.background = [0.5, 0.5, 0.5, 1.0];
 		data.background = [0, 0, 0, 1];
 		data.rotateSpeed = 0.01;
+		data.zoomFactor = 0.01;
 
 		gl.enable(gl.DEPTH_TEST);
 		//gl.enable(gl.CULL_FACE);

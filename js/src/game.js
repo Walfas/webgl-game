@@ -129,7 +129,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			input.mouseMove = [0,0];
 			if (input.scroll) {
-				this.camera.changeDistance(-input.scroll);
+				this.camera.changeDistance(input.scroll);
 				input.scroll = 0;
 			}
 		}

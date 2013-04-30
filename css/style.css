@@ -7,5 +7,12 @@ html, body {
 
 canvas { 
 	display:block; 
-	background:grey;
+	background:black;
 } 
+
+#content {
+	width:200;
+	height:150;
+	resize:both;
+}
+
