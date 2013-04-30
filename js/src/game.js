@@ -27,31 +27,42 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			//DEBUG
 			var cubes = [[[]]];
-			for (var z=0; z<1; z++) {
+			var levelSize = [16, 50, 2];
+			for (var z=0; z<levelSize[2]; z++) {
 				cubes[z] = [];
-				for (var y=0; y<16; y++) {
+				for (var y=0; y<levelSize[1]; y++) {
 					cubes[z][y] = [];
-					for (var x=0; x<16; x++) {
-						if(Math.random() > 1.3) {
+					for (var x=0; x<levelSize[0]; x++) {
+						if (z==0) {
+							cubes[z][y][x] = (Math.random() > 0.3) ? 3 : 2;
+							continue;
+						}
+						if(Math.random() > 0.3) {
 							cubes[z][y][x] = 0;
 							continue;
 						}
+
+						var tiles = [2, 3, 4];
+						var tileNum = Math.round(Math.random()*tiles.length);
 						//cubes[z][y][x] = Math.floor(Math.random()*256);
-						cubes[z][y][x] = y*16+x;
+						cubes[z][y][x] = tileNum;
+						//cubes[z][y][x] = y*16+x;
 					}
 				}
 			}
 
 			this.lights = [];
-			this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,0,0]);
-			//this.lights[1] = new light.PointLight([0.0, 0.0, 1.0], [8,8,8]);
+			this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,0,1]);
+			this.lights[1] = new light.PointLight([0.0, 0.0, 1.0], [8,5,1.5], [0, 0.2, 0]);
+			this.lights[2] = new light.PointLight([0.0, 1.0, 0.0], [8,15,1.5], [0, 0.5, 0]);
+			this.lights[3] = new light.PointLight([1.0, 0.0, 0.0], [8,35,1.5], [0, 0.5, 0]);
 			this.camera = new camera.Camera();
-			this.ambient = [1,1,1];
+			this.ambient = [0,0,0];
 
 			this.level.generate(cubes);
 
 			this.sprites = new sprites.Sprites(texture.sprites);
-			this.sprites.addSprite(14, [0,0,0]);
+			this.sprites.addSprite(14, [1,1,1]);
 			//this.sprites.addSprite(Math.floor(Math.random()*256), [0,0,0]);
 			this.player = this.sprites.sprites[0];
 			this.sprites.update();
@@ -174,6 +185,8 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			handleInputs();
 
+			this.lights[0].position = this.player.pos.slice(0);
+			this.lights[0].position[2] += 2;
 			this.camera.moveCenter(this.player.pos, [0.0, 0.0, 0.5]);
 			this.camera.updateMatrix(this.level.cubes);
 

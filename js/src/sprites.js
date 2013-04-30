@@ -1,6 +1,6 @@
 define(["gl","glmatrix","texture"], function(gl,glmat,texture) {
-	function Sprite() {
-		this.pos = [0,0,0];
+	function Sprite(pos) {
+		this.pos = pos ? pos : [0,0,0];
 		this.theta = 0;
 		this.vel = [0,0,0];
 		this.maxSpeed = 0.1;

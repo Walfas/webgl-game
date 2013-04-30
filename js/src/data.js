@@ -6,7 +6,8 @@ define(["gl", "glmatrix", "programs", "light"],
 		setLightUniforms(data.world);
 		setLightUniforms(data.sprites);
 
-		data.background = [0.5, 0.5, 0.5, 1.0];
+		//data.background = [0.5, 0.5, 0.5, 1.0];
+		data.background = [0, 0, 0, 1];
 		data.rotateSpeed = 0.01;
 
 		gl.enable(gl.DEPTH_TEST);
