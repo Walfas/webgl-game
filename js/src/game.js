@@ -52,18 +52,20 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			}
 
 			this.lights = [];
-			this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,0,1]);
-			this.lights[1] = new light.PointLight([0.0, 0.0, 1.0], [8,5,1.5], [0, 0.2, 0]);
-			this.lights[2] = new light.PointLight([0.0, 1.0, 0.0], [8,15,1.5], [0, 0.5, 0]);
-			this.lights[3] = new light.PointLight([1.0, 0.0, 0.0], [8,35,1.5], [0, 0.5, 0]);
+			this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,0,1], [0.3, 0.1, 0.05]);
+			this.lights[1] = new light.PointLight([1.0, 0.5, 0.0], [8,15,1.5], [0.3, 0.1, 0.05]);
+			//this.lights[1] = new light.PointLight([0.0, 0.0, 1.0], [8,5,1.5], [0, 0.2, 0]);
+			//this.lights[2] = new light.PointLight([0.0, 1.0, 0.0], [8,15,1.5], [0, 0.5, 0]);
+			//this.lights[3] = new light.PointLight([1.0, 0.0, 0.0], [8,35,1.5], [0, 0.5, 0]);
 			this.camera = new camera.Camera();
-			this.ambient = [0,0,0];
+			this.ambient = [0.0, 0.0, 0.1];
 
 			this.level.generate(cubes);
 
 			this.sprites = new sprites.Sprites(texture.sprites);
-			this.sprites.addSprite(14, [1,1,1]);
-			//this.sprites.addSprite(Math.floor(Math.random()*256), [0,0,0]);
+			//this.sprites.addSprite(14, [1,1,1]);
+			this.sprites.addSprite(Math.floor(Math.random()*256), [1,1,1]);
+			this.sprites.addSprite(Math.floor(Math.random()*256), [1,1,1]);
 			this.player = this.sprites.sprites[0];
 			this.sprites.update();
 
@@ -71,6 +73,8 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 		}
 
 		function renderWorld() {
+			gl.enable(gl.CULL_FACE);
+			gl.cullFace(gl.BACK);
 			gl.useProgram(data.world.program);
 			data.world.m.vMatrix = this.camera.matrix;
 
@@ -143,6 +147,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 		}
 
 		function renderSprites() {
+			gl.disable(gl.CULL_FACE);
 			this.counter++;
 
 			gl.useProgram(data.sprites.program);

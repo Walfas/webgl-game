@@ -38,7 +38,7 @@ define(["canvas"], function(canvas) {
 
 	function mousewheel(e) {
 		var event = window.event || e;
-		input.scroll = event.detail ? event.detail : -event.wheelDelta;
+		input.scroll = event.detail ? event.detail : -event.wheelDelta/120;
 	}
 
 	document.onkeydown = function(event) {

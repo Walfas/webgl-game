@@ -140,7 +140,7 @@ define(["gl","glmatrix","texture"], function(gl,glmat,texture) {
 			for (var i=0; i<4; i++) {
 				this.moving[spriteId*4+i] = this.sprites[spriteId].moving;
 				for (var j=0; j<3; j++) 
-					this.vertices[spriteId*4+i*3+j] = pos[j];
+					this.vertices[spriteId*12+i*3+j] = pos[j];
 			}
 		}
 
@@ -149,7 +149,6 @@ define(["gl","glmatrix","texture"], function(gl,glmat,texture) {
 				for (var j=0; j<3; j++) 
 					this.vertices[spriteId*4+i*3+j] += d[j];
 		}
-
 	}
 
 	return {

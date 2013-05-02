@@ -46,7 +46,7 @@ void main(void) {
 		vec3 mult = vec3(0.05, 0.0, 0.13);
 		if (offset.x < 0.0)
 			mult.x *= -1.0;
-		if (offset.z > 0.0)
+		if (offset.z > 0.5)
 			mult.z *= -1.0;
 		else
 			mult.z = 0.0;

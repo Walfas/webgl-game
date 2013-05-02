@@ -12,8 +12,6 @@ define(["gl", "glmatrix", "programs", "light"],
 		data.zoomFactor = 0.01;
 
 		gl.enable(gl.DEPTH_TEST);
-		//gl.enable(gl.CULL_FACE);
-		//gl.cullFace(gl.BACK);
 
 		gl.useProgram(data.world.program);
 		return data;
