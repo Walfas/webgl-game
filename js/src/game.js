@@ -1,5 +1,5 @@
-require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "light", "camera", "input"], 
-	function(canvas, gl, glmat, data, texture, terrain, sprites, light, camera, input) {
+require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "light", "camera", "input", "dungeon-convert"], 
+	function(canvas, gl, glmat, data, texture, terrain, sprites, light, camera, input, dungeonConvert) {
 
 		texture.land = new texture.TextureAtlas("img/ldfaithful.png", 8);
 		texture.sprites = null;
@@ -26,6 +26,8 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			this.level = new terrain.Terrain(texture.land);
 
 			//DEBUG
+			//var cubes = dungeonConvert([50,50],[5,5],[2,2]);
+
 			var cubes = [[[]]];
 			var levelSize = [16, 50, 2];
 			for (var z=0; z<levelSize[2]; z++) {
