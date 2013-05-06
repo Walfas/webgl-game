@@ -17,6 +17,8 @@ define(["gl","glmatrix","texture"], function(gl,glmat,texture) {
 			if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001)
 				return;
 			this.theta = Math.atan2(dy,dx);
+			this.limitTheta();
+			this.flipped = (this.theta < 0.5*Math.PI || this.theta > 1.5*Math.PI) ? 0 : 1;
 			this.moveForward(env);
 		}
 		this.limitTheta = function() {
