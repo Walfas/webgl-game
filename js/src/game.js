@@ -37,13 +37,15 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 							cubes[z][y][x] = (Math.random() > 0.3) ? 3 : 2;
 							continue;
 						}
-						if(Math.random() > 0.3) {
+
+						if (Math.random() > 0.3) {
 							cubes[z][y][x] = 0;
 							continue;
 						}
 
-						var tiles = [2, 3, 4];
-						var tileNum = Math.round(Math.random()*tiles.length);
+						var tiles = [1, 2, 3, 4];
+						var tileNum = tiles[Math.floor(Math.random()*tiles.length)];
+
 						//cubes[z][y][x] = Math.floor(Math.random()*256);
 						cubes[z][y][x] = tileNum;
 						//cubes[z][y][x] = y*16+x;
@@ -66,6 +68,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			//this.sprites.addSprite(14, [1,1,1]);
 			this.sprites.addSprite(Math.floor(Math.random()*256), [1,1,1]);
 			this.sprites.addSprite(Math.floor(Math.random()*256), [1,1,1]);
+			this.sprites.sprites[1].maxSpeed /= 2;
 			this.player = this.sprites.sprites[0];
 			this.sprites.update();
 
@@ -192,6 +195,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			this.lights[0].position = this.player.pos.slice(0);
 			this.lights[0].position[2] += 2;
+			this.sprites.sprites[1].moveToward(this.level, this.player.pos);
 			this.camera.moveCenter(this.player.pos, [0.0, 0.0, 0.5]);
 			this.camera.updateMatrix(this.level.cubes);
 

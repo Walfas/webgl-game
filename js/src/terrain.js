@@ -28,7 +28,7 @@ define(["gl","texture"], function(gl,texture) {
 				if (z < 0 || z >= this.cubes.length || 
 					y < 0 || y >= this.cubes[z].length ||
 					x < 0 || x >= this.cubes[z][y].length)
-					return false;
+					return true;
 
 				return this.cubes[z][y][x];
 			}
@@ -41,6 +41,15 @@ define(["gl","texture"], function(gl,texture) {
 						for (var x=0; x<world[z][y].length; x++) {
 							if (world[z][y][x] == 0)
 								continue;
+							if (z == 0) {
+								this.addBlock(
+									world[z][y][x], 
+									[x,y,z], 
+									[false, false, false, false, false, true]	
+								);
+								continue;
+							}
+
 							var showFace = [true, true, true, true, true, true];
 							if (x > 0)
 								showFace[0] = !world[z][y][x-1];

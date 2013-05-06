@@ -11,6 +11,14 @@ define(["gl","glmatrix","texture"], function(gl,glmat,texture) {
 			this.pos = pos;
 			this.moving = 0;
 		}
+		this.moveToward = function(env,pos) {
+			var dx = pos[0] - this.pos[0];
+			var dy = pos[1] - this.pos[1];
+			if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001)
+				return;
+			this.theta = Math.atan2(dy,dx);
+			this.moveForward(env);
+		}
 		this.limitTheta = function() {
 			if (this.theta < 0)
 				this.theta += 2*Math.PI;

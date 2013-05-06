@@ -9,8 +9,7 @@ define(["glmatrix"], function(glmat) {
 			this.up = [0, 0, 1];
 			this.pos = [0, 0, 0];
 
-		
-			this.thetaLimits = [1.4*Math.PI, 1.8*Math.PI];
+			this.thetaLimits = [1.5*Math.PI, 1.8*Math.PI];
 			this.distanceLimits = [2.0, 15.0];
 			this.zoomWeight = 0.1;
 
