@@ -1,9 +1,12 @@
-define(["dungeon"], function(dungeon) {
-	return function(tileDim, roomDim, roomMinSize) {
-		var d = new dungeon.dungeon(tileDim,roomDim,roomMinSize);
+define(["dungeon","levels"], function(dungeon,levels) {
+	return function(level) {
 		var cubes = [];
-		var upStairs = [0,0,0];
-		var downStairs = [0,0,0];
+		var upstairs = [0,0,0];
+		var downstairs = [0,0,0];
+		var tileDim = level.tileDim;
+		var roomDim = level.roomDim;
+		var roomMinSize = level.roomMinSize;
+		var d = new dungeon.dungeon(tileDim,roomDim,roomMinSize);
 
 		for (var z=0; z<2; z++) {
 			cubes[z] = [];
@@ -19,11 +22,11 @@ define(["dungeon"], function(dungeon) {
 						cubes[z][y][x] = getFloor(z); break;
 					case d.tileVals.up:
 						cubes[z][y][x] = getUp(z); 
-						upStairs = [x,y,z];
+						upstairs = [x,y,1.2];
 						break;
 					case d.tileVals.down:
 						cubes[z][y][x] = getDown(z); 
-						downStairs = [x,y,z];
+						downstairs = [x,y,1.2];
 						break;
 					}
 				}
@@ -31,29 +34,33 @@ define(["dungeon"], function(dungeon) {
 		}
 		return {
 			cubes: cubes,
-			upStairs: upStairs,
-			downStairs: downStairs
+			upstairs: upstairs,
+			downstairs: downstairs
 		};
 
+		function randFromArray(arr) {
+			return arr[Math.floor(Math.random()*arr.length)];
+		}
+
 		function getWall(z) {
-			if (z > 0)
-				return 3;
-			return 0;
+			if (z == 0)
+				return 0;
+			return randFromArray(level.wallTiles);
 		}
 		function getFloor(z) {
 			if (z > 0)
 				return 0;
-			return 3;
+			return randFromArray(level.floorTiles);
 		}
 		function getUp(z) {
 			if (z > 0)
 				return 0;
-			return 4;
+			return 212;
 		}
 		function getDown(z) {
 			if (z > 0)
 				return 0;
-			return 4;
+			return 211;
 		}
 	}
 });

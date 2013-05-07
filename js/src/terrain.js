@@ -8,10 +8,10 @@ define(["gl","texture"], function(gl,texture) {
 			this.texCoords = [];
 			this.indices = [];
 			this.baseIndex = 0;
-			this.vertexObject = gl.createBuffer();
-			this.normalObject = gl.createBuffer();
-			this.texCoordObject = gl.createBuffer();
-			this.indexObject = gl.createBuffer();
+			this.vertexObject = null;
+			this.normalObject = null;
+			this.texCoordObject = null;
+			this.indexObject = null;
 
 			this.numVertices = function() { return this.indices.length; };
 			
@@ -35,6 +35,12 @@ define(["gl","texture"], function(gl,texture) {
 
 			this.generate = function(world) {
 				this.cubes = world;
+				this.vertices = [];
+				this.normals = [];
+				this.texCoords = [];
+				this.indices = [];
+				this.baseIndex = 0;
+
 				// Test for hidden faces and add blocks
 				for (var z=0; z<world.length; z++) {
 					for (var y=0; y<world[z].length; y++) {
@@ -70,6 +76,15 @@ define(["gl","texture"], function(gl,texture) {
 				}
 
 				// Initialize buffer data
+				gl.deleteBuffer(this.vertexObject);
+				gl.deleteBuffer(this.normalObject);
+				gl.deleteBuffer(this.texCoordObject);
+				gl.deleteBuffer(this.indexObject);
+				this.vertexObject = gl.createBuffer();
+				this.normalObject = gl.createBuffer();
+				this.texCoordObject = gl.createBuffer();
+				this.indexObject = gl.createBuffer();
+
 				gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexObject);
 				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
 

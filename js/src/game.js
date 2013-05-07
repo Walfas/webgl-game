@@ -1,9 +1,8 @@
-require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "light", "camera", "input", "dungeon-convert"], 
-	function(canvas, gl, glmat, data, texture, terrain, sprites, light, camera, input, dungeon) {
-
+require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "light", "camera", "input", "dungeon-convert", "levels"], 
+	function(canvas, gl, glmat, data, texture, terrain, sprites, light, camera, input, dungeon, levels) {
 		texture.land = new texture.TextureAtlas("img/ldfaithful.png", 8);
 		texture.sprites = null;
-		this.level = null;
+		this.terrain = null;
 		this.sprites = null;
 		this.counter = 0;
 		
@@ -23,58 +22,44 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 				window.setTimeout(checkLoaded, 100);
 				return;
 			}
-			this.level = new terrain.Terrain(texture.land);
+			this.terrain = new terrain.Terrain(texture.land);
 
 			//DEBUG
-			var dungeonObj = new dungeon([50,50],[5,5],[3,3]);
-			var cubes = dungeonObj.cubes;
+			this.camera = new camera.Camera();
 
-/*
-			var cubes = [[[]]];
-			var levelSize = [16, 50, 2];
-			for (var z=0; z<levelSize[2]; z++) {
-				cubes[z] = [];
-				for (var y=0; y<levelSize[1]; y++) {
-					cubes[z][y] = [];
-					for (var x=0; x<levelSize[0]; x++) {
-						if (z==0) {
-							cubes[z][y][x] = (Math.random() > 0.3) ? 3 : 2;
-							continue;
-						}
-
-						if (Math.random() > 0.3) {
-							cubes[z][y][x] = 0;
-							continue;
-						}
-
-						var tiles = [1, 2, 3, 4];
-						var tileNum = tiles[Math.floor(Math.random()*tiles.length)];
-
-						//cubes[z][y][x] = Math.floor(Math.random()*256);
-						cubes[z][y][x] = tileNum;
-						//cubes[z][y][x] = y*16+x;
-					}
-				}
-			}
-			*/
+			this.levelNum = 0;
+			this.level = levels.getLevel(this.levelNum);
 
 			this.lights = [];
 			this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,0,1], [0.3, 0.1, 0.05]);
-			this.lights[1] = new light.PointLight([1.0, 0.5, 0.0], [8,15,1.5], [0.3, 0.1, 0.05]);
-			this.camera = new camera.Camera();
-			this.ambient = [0.2, 0.2, 0.2];
-
-			this.level.generate(cubes);
 
 			this.sprites = new sprites.Sprites(texture.sprites);
-			//this.sprites.addSprite(14, [1,1,1]);
-			this.sprites.addSprite(Math.floor(Math.random()*256), dungeonObj.upStairs);
-			this.sprites.addSprite(Math.floor(Math.random()*256), dungeonObj.downStairs);
-			this.sprites.sprites[1].maxSpeed /= 2;
+			this.sprites.addSprite(Math.floor(Math.random()*256), [0,0,0]);
 			this.player = this.sprites.sprites[0];
+
+			this.sprites.addSprite(Math.floor(Math.random()*256), [0,0,1]);
+			this.sprites.sprites[1].maxSpeed /= 2;
+
 			this.sprites.update();
 
+			goToLevel(0);
 			tick();
+		}
+
+		function goToLevel(l) {
+			this.level = levels.getLevel(l);
+			this.dungeonObj = new dungeon(this.level);
+			this.lights[1] = new light.PointLight([1.0, 0.5, 0.0], centerXY(this.dungeonObj.upstairs), [0.2, 0.1, 0.05]);
+			this.terrain.generate(this.dungeonObj.cubes);
+
+			player.pos = centerXY(this.dungeonObj.upstairs);
+			this.sprites.sprites[1].pos = centerXY(this.dungeonObj.upstairs);
+			this.sprites.update();
+		}
+
+
+		function centerXY(pos) {
+			return [pos[0]+0.5, pos[1]+0.5, pos[2]];
 		}
 
 		function renderWorld() {
@@ -87,20 +72,20 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			gl.uniformMatrix4fv(data.world.u.VMatrix, false, data.world.m.vMatrix);
 			gl.uniformMatrix4fv(data.world.u.PMatrix, false, data.world.m.pMatrix);
 
-			gl.uniform3fv(data.world.u.AmbientColor, this.ambient);
+			gl.uniform3fv(data.world.u.AmbientColor, this.level.ambient);
 
 			updateLights(data.world);
 			// Bind buffers
-			attribSetup(data.world.a.Position, this.level.vertexObject, 3);
-			attribSetup(data.world.a.Texture, this.level.texCoordObject, 2);
-			attribSetup(data.world.a.Normal, this.level.normalObject, 3);
+			attribSetup(data.world.a.Position, this.terrain.vertexObject, 3);
+			attribSetup(data.world.a.Texture, this.terrain.texCoordObject, 2);
+			attribSetup(data.world.a.Normal, this.terrain.normalObject, 3);
 
 			gl.activeTexture(gl.TEXTURE0);
-			gl.bindTexture(gl.TEXTURE_2D, this.level.textureAtlas.texture);
+			gl.bindTexture(gl.TEXTURE_2D, this.terrain.textureAtlas.texture);
 			gl.uniform1i(data.world.u.Sampler, 0);
 
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.level.indexObject);
-			gl.drawElements(gl.TRIANGLES, this.level.numVertices(), gl.UNSIGNED_SHORT, 0);
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.terrain.indexObject);
+			gl.drawElements(gl.TRIANGLES, this.terrain.numVertices(), gl.UNSIGNED_SHORT, 0);
 		}
 
 		function updateLights(program) {
@@ -121,14 +106,14 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			if (input.pressedKeys[68]) inputMask += 8; // D
 
 			switch(inputMask) {
-			case  1: this.player.turnAndMove(this.level, 0); break;
-			case  2: this.player.flipped = 1; this.player.turnAndMove(this.level, Math.PI/2); break;
-			case  3: this.player.flipped = 1; this.player.turnAndMove(this.level, Math.PI/4); break;
-			case  4: this.player.turnAndMove(this.level, Math.PI); break;
-			case  6: this.player.flipped = 1; this.player.turnAndMove(this.level, 3/4*Math.PI); break;
-			case  8: this.player.flipped = 0; this.player.turnAndMove(this.level,-Math.PI/2); break;
-			case  9: this.player.flipped = 0; this.player.turnAndMove(this.level,-Math.PI/4); break;
-			case 12: this.player.flipped = 0; this.player.turnAndMove(this.level, 5/4*Math.PI); break;
+			case  1: this.player.turnAndMove(this.terrain, 0); break;
+			case  2: this.player.flipped = 1; this.player.turnAndMove(this.terrain, Math.PI/2); break;
+			case  3: this.player.flipped = 1; this.player.turnAndMove(this.terrain, Math.PI/4); break;
+			case  4: this.player.turnAndMove(this.terrain, Math.PI); break;
+			case  6: this.player.flipped = 1; this.player.turnAndMove(this.terrain, 3/4*Math.PI); break;
+			case  8: this.player.flipped = 0; this.player.turnAndMove(this.terrain,-Math.PI/2); break;
+			case  9: this.player.flipped = 0; this.player.turnAndMove(this.terrain,-Math.PI/4); break;
+			case 12: this.player.flipped = 0; this.player.turnAndMove(this.terrain, 5/4*Math.PI); break;
 			}
 
 			if (input.rightClick) {
@@ -166,7 +151,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			gl.uniformMatrix4fv(data.sprites.u.PMatrix, false, data.world.m.pMatrix);
 
 			gl.uniform1f(data.sprites.u.Counter, this.counter);
-			gl.uniform3fv(data.sprites.u.AmbientColor, this.ambient);
+			gl.uniform3fv(data.sprites.u.AmbientColor, this.level.ambient);
 			gl.uniform3fv(data.sprites.u.CamPos, this.camera.pos);
 
 			updateLights(data.sprites);
@@ -197,12 +182,24 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 
 			this.lights[0].position = this.player.pos.slice(0);
 			this.lights[0].position[2] += 2;
-			this.sprites.sprites[1].moveToward(this.level, this.player.pos);
+			this.sprites.sprites[1].moveToward(this.terrain, this.player.pos);
 			this.camera.moveCenter(this.player.pos, [0.0, 0.0, 0.5]);
-			this.camera.updateMatrix(this.level.cubes);
+			this.camera.updateMatrix(this.terrain.cubes);
+
+			checkStairs();
 
 			renderWorld();
 			renderSprites();
+		}
+
+		function checkStairs() {
+			var cubePos = [0,0,0];
+			for (var i=0; i<3; i++)
+				cubePos[i] = Math.floor(player.pos[i]);
+			if (cubePos[0] == this.dungeonObj.downstairs[0] && 
+				cubePos[1] == this.dungeonObj.downstairs[1]) {
+				goToLevel(this.levelNum++);
+			}
 		}
 
 		function tick() {

@@ -208,6 +208,10 @@ var Room = (function() {
 
 			for(;;) {
 				this.plot(x0,y0);
+				this.plot(x0-1,y0);
+				this.plot(x0+1,y0);
+				this.plot(x0,y0-1);
+				this.plot(x0,y0+1);
 
 				if (x0==x1 && y0==y1) 
 					break;
@@ -216,12 +220,10 @@ var Room = (function() {
 				if (e2 >-dy) { 
 					err -= dy; 
 					x0 += sx; 
-					this.plot(x0,y0);
 				}
 				if (e2 < dx) { 
 					err += dx; 
 					y0 += sy; 
-					this.plot(x0,y0);
 				}
 			}
 		}
