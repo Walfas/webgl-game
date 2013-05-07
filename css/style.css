@@ -16,3 +16,14 @@ canvas {
 	resize:both;
 }
 
+#overlay {
+	padding:5px;
+	position:absolute;
+	font-size:150%;
+	font-family:monospace;
+	color:white;
+	top:0;
+	left:0;
+	z-index:10;
+}
+

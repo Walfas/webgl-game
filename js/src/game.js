@@ -5,6 +5,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 		this.terrain = null;
 		this.sprites = null;
 		this.counter = 0;
+		this.overlay = document.getElementById("overlay");
 		
 		checkLoaded();
 		function checkLoaded() {
@@ -41,12 +42,13 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			this.sprites.sprites[1].maxSpeed /= 2;
 
 			this.sprites.update();
-
-			goToLevel(0);
+			
+			goToLevel(this.levelNum);
 			tick();
 		}
 
 		function goToLevel(l) {
+			this.overlay.innerHTML = "Loading...";
 			this.level = levels.getLevel(l);
 			this.dungeonObj = new dungeon(this.level);
 			this.lights[1] = new light.PointLight([1.0, 0.5, 0.0], centerXY(this.dungeonObj.upstairs), [0.2, 0.1, 0.05]);
@@ -55,6 +57,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			player.pos = centerXY(this.dungeonObj.upstairs);
 			this.sprites.sprites[1].pos = centerXY(this.dungeonObj.upstairs);
 			this.sprites.update();
+			this.overlay.innerHTML = l+1;
 		}
 
 
@@ -198,7 +201,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 				cubePos[i] = Math.floor(player.pos[i]);
 			if (cubePos[0] == this.dungeonObj.downstairs[0] && 
 				cubePos[1] == this.dungeonObj.downstairs[1]) {
-				goToLevel(this.levelNum++);
+				goToLevel(++this.levelNum);
 			}
 		}
 
