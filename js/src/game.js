@@ -39,7 +39,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			this.player = this.sprites.sprites[0];
 
 			this.sprites.addSprite(Math.floor(Math.random()*256), [0,0,1]);
-			this.sprites.sprites[1].maxSpeed /= 2;
+			this.sprites.sprites[1].maxSpeed *= 0.8;
 
 			this.sprites.update();
 			
@@ -198,7 +198,7 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 		function checkStairs() {
 			var cubePos = [0,0,0];
 			for (var i=0; i<3; i++)
-				cubePos[i] = Math.floor(player.pos[i]);
+				cubePos[i] = Math.floor(this.sprites.sprites[1].pos[i]);
 			if (cubePos[0] == this.dungeonObj.downstairs[0] && 
 				cubePos[1] == this.dungeonObj.downstairs[1]) {
 				goToLevel(++this.levelNum);
