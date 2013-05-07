@@ -1,4 +1,4 @@
-(function() {
+define(function() {
 var randInt = function(min,max) {
 	if (max == null) {
 		max = min;
@@ -68,7 +68,6 @@ var Room = (function() {
 	return Room;
 })();
 
-var Dungeon = (function() {
 	var Dungeon = function(tileDim, roomDim, roomMinSize) {
 		this.tileDim = tileDim;
 		this.roomDim = roomDim;
@@ -80,6 +79,14 @@ var Dungeon = (function() {
 		this.rooms = [];
 		this.firstRoom = 0;
 		this.lastRoom = 0;
+
+		this.tileVals = {
+			wall:  "#",
+			floor: " ",
+			empty: ".",
+			up:    "u",
+			down:  "d",
+		}
 		
 		var tiles = [];
 		for (var i=0; i<tileDim[0]; i++) {
@@ -120,157 +127,146 @@ var Dungeon = (function() {
 		}
 		this.rooms = rooms;
 		
+
+		this.getRoomFromCoords = function(x,y) {
+			return this.rooms[x*this.rooms.length][y];
+		};
+
+		this.getRoomFromId = function(id) {
+			return this.rooms[Math.floor(id/this.roomDim[0])][id%this.roomDim[1]];
+		};
+		
+		this.generate = function() {
+			var unconnected = [];
+			for (var i=0; i<this.numRooms; i++)
+				unconnected[i] = i;
+
+			// See http://kuoi.com/~kamikaze/GameDesign/art07_rogue_dungeon.php
+			var roomId = randInt(this.numRooms);
+			var current = this.getRoomFromId(roomId);
+			var firstRoom = roomId;
+			while (current && current.unconnectedNeighbors.length > 0) {
+				roomId = current.id;
+				var roomIndex = unconnected.indexOf(roomId);
+				if (roomIndex >= 0)
+					unconnected.splice(roomIndex,1);
+				current = current.connectRandom();
+			}
+			while (unconnected.length > 0) {
+				var roomNum = randInt(unconnected.length);
+				current = this.getRoomFromId(unconnected[roomNum]);
+				if (current.connectToConnected()) 
+					unconnected.splice(roomNum,1);
+			}
+			var lastRoom = current.id;
+
+			// Draw and connect rooms
+			for (var i=0; i<this.numRooms; i++) {
+				var room = this.getRoomFromId(i);
+				this.fillRoom(room);
+				for (var j=0; j<room.connectedTo.length; j++) {
+					this.connectRooms(room,room.connectedTo[j]);
+				}
+			}
+
+			// Place up stairs
+			var room = this.getRoomFromId(firstRoom);
+			this.upStairsPos = [
+				room.rect[0] + randInt(room.rect[2]),
+				room.rect[1] + randInt(room.rect[3]),
+			];
+			this.plot(this.upStairsPos[0],this.upStairsPos[1],this.tileVals.up);
+			room = this.getRoomFromId(lastRoom);
+			this.downStairsPos = [
+				room.rect[0] + randInt(room.rect[2]),
+				room.rect[1] + randInt(room.rect[3]),
+			];
+			this.plot(this.downStairsPos[0],this.downStairsPos[1],this.tileVals.down);
+			this.cleanUpWalls();
+		};
+
+		this.plot = function(x,y,val) {
+			if (!val)
+				val = this.tileVals.floor;
+			this.tiles[Math.floor(x)][Math.floor(y)] = val;
+		};
+
+		this.fillRoom = function(room) {
+			for (var i=room.rect[0]; i<room.rect[0]+room.rect[2]; i++)
+				for (var j=room.rect[1]; j<room.rect[1]+room.rect[3]; j++)
+					this.plot(i,j);
+		};
+
+		// Bresenham's line algorithm
+		// Thanks to: http://stackoverflow.com/a/4672319/1887090
+		this.fillHallway = function(x0,y0,x1,y1) {
+			var dx = Math.abs(x1-x0);
+			var dy = Math.abs(y1-y0);
+			var sx = (x0 < x1) ? 1 : -1;
+			var sy = (y0 < y1) ? 1 : -1;
+			var err = dx-dy;
+
+			for(;;) {
+				this.plot(x0,y0);
+
+				if (x0==x1 && y0==y1) 
+					break;
+
+				var e2 = 2*err;
+				if (e2 >-dy) { 
+					err -= dy; 
+					x0 += sx; 
+					this.plot(x0,y0);
+				}
+				if (e2 < dx) { 
+					err += dx; 
+					y0 += sy; 
+					this.plot(x0,y0);
+				}
+			}
+		}
+
+		this.connectRooms = function(room1,room2) {
+			this.fillHallway(
+				Math.floor(room1.rect[0] + room1.rect[2]/2),
+				Math.floor(room1.rect[1] + room1.rect[3]/2),
+				Math.floor(room2.rect[0] + room2.rect[2]/2),
+				Math.floor(room2.rect[1] + room2.rect[3]/2)
+			);
+		};
+
+		this.cleanUpWalls = function() {
+			for (var i=0; i<this.tileDim[0]; i++) {
+				for (var j=0; j<this.tileDim[1]; j++) {
+					if (this.tiles[i][j] != this.tileVals.wall)
+						continue;
+
+					if (i>0 && this.isWalkable(i-1,j)
+						|| i<this.tileDim[0]-1 && this.isWalkable(i+1,j)
+						|| j>0 && this.isWalkable(i,j-1)
+						|| j<this.tileDim[1]-1 && this.isWalkable(i,j+1)
+					)
+						continue;
+					this.tiles[i][j] = this.tileVals.empty;
+				}
+			}
+		}
+
+		this.isWalkable = function(x,y) {
+			return this.tiles[x][y] != this.tileVals.wall && this.tiles[x][y] != this.tileVals.empty;
+		}
+
+		this.printDungeon = function() {
+			var str = "";
+			for (var i=0; i<this.tileDim[0]; i++) {
+				str += "\n";
+				for (var j=0; j<this.tileDim[1]; j++)
+					str += this.tiles[i][j];
+			}
+			console.log(str);
+		}
 		this.generate();
 	};
 
-	Dungeon.prototype.tileVals = {
-		wall:  "#",
-		floor: " ",
-		empty: ".",
-		up:    "u",
-		down:  "d",
-	}
-
-	Dungeon.prototype.getRoomFromCoords = function(x,y) {
-		return this.rooms[x*this.rooms.length][y];
-	};
-
-	Dungeon.prototype.getRoomFromId = function(id) {
-		return this.rooms[Math.floor(id/this.roomDim[0])][id%this.roomDim[1]];
-	};
-	
-	Dungeon.prototype.generate = function() {
-		var unconnected = [];
-		for (var i=0; i<this.numRooms; i++)
-			unconnected[i] = i;
-
-		// See http://kuoi.com/~kamikaze/GameDesign/art07_rogue_dungeon.php
-		var roomId = randInt(this.numRooms);
-		var current = this.getRoomFromId(roomId);
-		var firstRoom = roomId;
-		while (current && current.unconnectedNeighbors.length > 0) {
-			roomId = current.id;
-			var roomIndex = unconnected.indexOf(roomId);
-			if (roomIndex >= 0)
-				unconnected.splice(roomIndex,1);
-			current = current.connectRandom();
-		}
-		while (unconnected.length > 0) {
-			var roomNum = randInt(unconnected.length);
-			current = this.getRoomFromId(unconnected[roomNum]);
-			if (current.connectToConnected()) 
-				unconnected.splice(roomNum,1);
-		}
-		var lastRoom = current.id;
-
-		// Draw and connect rooms
-		for (var i=0; i<this.numRooms; i++) {
-			var room = this.getRoomFromId(i);
-			this.fillRoom(room);
-			for (var j=0; j<room.connectedTo.length; j++) {
-				this.connectRooms(room,room.connectedTo[j]);
-			}
-		}
-
-		// Place up stairs
-		var room = this.getRoomFromId(firstRoom);
-		this.upStairsPos = [
-			room.rect[0] + randInt(room.rect[2]),
-			room.rect[1] + randInt(room.rect[3]),
-		];
-		this.plot(this.upStairsPos[0],this.upStairsPos[1],this.tileVals.up);
-		room = this.getRoomFromId(lastRoom);
-		this.downStairsPos = [
-			room.rect[0] + randInt(room.rect[2]),
-			room.rect[1] + randInt(room.rect[3]),
-		];
-		this.plot(this.downStairsPos[0],this.downStairsPos[1],this.tileVals.down);
-		this.cleanUpWalls();
-	};
-
-	Dungeon.prototype.plot = function(x,y,val) {
-		if (!val)
-			val = this.tileVals.floor;
-		this.tiles[Math.floor(x)][Math.floor(y)] = val;
-	};
-
-	Dungeon.prototype.fillRoom = function(room) {
-		for (var i=room.rect[0]; i<room.rect[0]+room.rect[2]; i++)
-			for (var j=room.rect[1]; j<room.rect[1]+room.rect[3]; j++)
-				this.plot(i,j);
-	};
-
-	// Bresenham's line algorithm
-	// Thanks to: http://stackoverflow.com/a/4672319/1887090
-	Dungeon.prototype.fillHallway = function(x0,y0,x1,y1) {
-		var dx = Math.abs(x1-x0);
-		var dy = Math.abs(y1-y0);
-		var sx = (x0 < x1) ? 1 : -1;
-		var sy = (y0 < y1) ? 1 : -1;
-		var err = dx-dy;
-
-		for(;;) {
-			this.plot(x0,y0);
-
-			if (x0==x1 && y0==y1) 
-				break;
-
-			var e2 = 2*err;
-			if (e2 >-dy) { 
-				err -= dy; 
-				x0 += sx; 
-				this.plot(x0,y0);
-			}
-			if (e2 < dx) { 
-				err += dx; 
-				y0 += sy; 
-				this.plot(x0,y0);
-			}
-		}
-	}
-
-	Dungeon.prototype.connectRooms = function(room1,room2) {
-		this.fillHallway(
-			Math.floor(room1.rect[0] + room1.rect[2]/2),
-			Math.floor(room1.rect[1] + room1.rect[3]/2),
-			Math.floor(room2.rect[0] + room2.rect[2]/2),
-			Math.floor(room2.rect[1] + room2.rect[3]/2)
-		);
-	};
-
-	Dungeon.prototype.cleanUpWalls = function() {
-		for (var i=0; i<this.tileDim[0]; i++) {
-			for (var j=0; j<this.tileDim[1]; j++) {
-				if (this.tiles[i][j] != this.tileVals.wall)
-					continue;
-
-				if (i>0 && this.isWalkable(i-1,j)
-					|| i<this.tileDim[0]-1 && this.isWalkable(i+1,j)
-					|| j>0 && this.isWalkable(i,j-1)
-					|| j<this.tileDim[1]-1 && this.isWalkable(i,j+1)
-				)
-					continue;
-				this.tiles[i][j] = this.tileVals.empty;
-			}
-		}
-	}
-
-	Dungeon.prototype.isWalkable = function(x,y) {
-		return this.tiles[x][y] != this.tileVals.wall && this.tiles[x][y] != this.tileVals.empty;
-	}
-
-	Dungeon.prototype.printDungeon = function() {
-		var str = "";
-		for (var i=0; i<this.tileDim[0]; i++) {
-			str += "\n";
-			for (var j=0; j<this.tileDim[1]; j++)
-				str += this.tiles[i][j];
-		}
-		console.log(str);
-	}
-	return Dungeon;
-})();
-var d = new Dungeon([50,50],[5,5],[2,2]);
-d.printDungeon();
-return Dungeon;
-})(this);
+	return { dungeon: Dungeon };
+});

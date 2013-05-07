@@ -1,5 +1,5 @@
 require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "light", "camera", "input", "dungeon-convert"], 
-	function(canvas, gl, glmat, data, texture, terrain, sprites, light, camera, input, dungeonConvert) {
+	function(canvas, gl, glmat, data, texture, terrain, sprites, light, camera, input, dungeon) {
 
 		texture.land = new texture.TextureAtlas("img/ldfaithful.png", 8);
 		texture.sprites = null;
@@ -26,8 +26,10 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 			this.level = new terrain.Terrain(texture.land);
 
 			//DEBUG
-			//var cubes = dungeonConvert([50,50],[5,5],[2,2]);
+			var dungeonObj = new dungeon([50,50],[5,5],[3,3]);
+			var cubes = dungeonObj.cubes;
 
+/*
 			var cubes = [[[]]];
 			var levelSize = [16, 50, 2];
 			for (var z=0; z<levelSize[2]; z++) {
@@ -54,22 +56,20 @@ require(["canvas", "gl", "glmatrix", "data", "texture", "terrain", "sprites", "l
 					}
 				}
 			}
+			*/
 
 			this.lights = [];
 			this.lights[0] = new light.PointLight([1.0, 0.5, 0.0], [0,0,1], [0.3, 0.1, 0.05]);
 			this.lights[1] = new light.PointLight([1.0, 0.5, 0.0], [8,15,1.5], [0.3, 0.1, 0.05]);
-			//this.lights[1] = new light.PointLight([0.0, 0.0, 1.0], [8,5,1.5], [0, 0.2, 0]);
-			//this.lights[2] = new light.PointLight([0.0, 1.0, 0.0], [8,15,1.5], [0, 0.5, 0]);
-			//this.lights[3] = new light.PointLight([1.0, 0.0, 0.0], [8,35,1.5], [0, 0.5, 0]);
 			this.camera = new camera.Camera();
-			this.ambient = [0.0, 0.0, 0.1];
+			this.ambient = [0.2, 0.2, 0.2];
 
 			this.level.generate(cubes);
 
 			this.sprites = new sprites.Sprites(texture.sprites);
 			//this.sprites.addSprite(14, [1,1,1]);
-			this.sprites.addSprite(Math.floor(Math.random()*256), [1,1,1]);
-			this.sprites.addSprite(Math.floor(Math.random()*256), [1,1,1]);
+			this.sprites.addSprite(Math.floor(Math.random()*256), dungeonObj.upStairs);
+			this.sprites.addSprite(Math.floor(Math.random()*256), dungeonObj.downStairs);
 			this.sprites.sprites[1].maxSpeed /= 2;
 			this.player = this.sprites.sprites[0];
 			this.sprites.update();
