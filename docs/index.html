@@ -1,0 +1,126 @@
+<p><link href="https://raw.github.com/jasonm23/markdown-css-themes/gh-pages/swiss.css" rel="stylesheet"></link>
+<link href="style.css" rel="stylesheet"></link></p>
+
+<h1>Description</h1>
+
+<p>This project is a 2.5D dungeon exploration game. In this case, 2.5D refers to 
+the fact that characters in the world are 2D objects (sprites) that exist in a 
+3D environment. A technique called "billboarding" is used to keep sprites 
+perpendicular to the line of sight of the camera, such that they are always 
+facing the camera, creating the illusion that the 2D sprites are actually a part 
+of the 3D world.</p>
+
+<h1>Setup</h1>
+
+<p>The code can be found in the attached files, but they must be uploaded to a 
+webserver before the game can be played, due to require.js's method of loading 
+text files. A lightweight webserver for Windows that can be used is 
+<a href="https://code.google.com/p/mongoose/downloads/list">mongoose</a> - using the program's default settings, open the program and 
+navigate to localhost:8080 in a browser to play the game. Any other webserver 
+such as Apache HTTP, Apache Tomcat, or nginx can also be used.</p>
+
+<h1>Gameplay</h1>
+
+<h3>Objective</h3>
+
+<p><img src="img/entrance_exit.png" alt="Figure 1" title="" /></p>
+
+<p><em>Figure 1. Entrance (left) and exit (right) of one floor of the dungeon</em></p>
+
+<p>The goal of the game is to explore a multi-level dungeon, guiding a follower to 
+the exit of each floor. Characters and dungeon layouts are randomized on each
+playthrough.</p>
+
+<h3>Controls</h3>
+
+<ul>
+<li>WASD keys for movement</li>
+<li>Right-click + drag to rotate the camera</li>
+<li>Scroll wheel to zoom in/out</li>
+</ul>
+
+<h1>Implementation</h1>
+
+<p>The project is implemented in WebGL, using the following libraries: </p>
+
+<ul>
+<li><a href="http://glmatrix.net/">glMatrix</a>: convenient matrix and vector functions.</li>
+<li><a href="http://requirejs.org/">require.js</a>: allows code to be separated into different module files, 
+manages inter-module dependencies, and allows modules to be loaded on demand 
+when needed.</li>
+</ul>
+
+<h3>Textures</h3>
+
+<p>Textures are stored in <a href="http://en.wikipedia.org/wiki/Texture_atlas">texture atlas</a> image files -- images that contain 
+many sub-images, each of which is a texture for some part of a 3D object. Since 
+the application uses a lot of small textures for different objects (e.g., the 
+terrain and characters), it is more efficient to use a large texture atlas than 
+it is to bind several smaller textures when rendering. Sub-textures are chosen 
+from the texture atlas by specifying texture coordinates of the object's uvmap 
+based on the desired texture.</p>
+
+<p><img src="../img/ldfaithful.png" alt="Figure 2a" title="" />
+<img src="../img/oryx.png" alt="Figure 2b" title="" /></p>
+
+<p><em>Figure 2. Texture atlases used in the game</em></p>
+
+<p>In the case of this game, environment textures are loaded from a Minecraft 
+<a href="http://www.minecraftwiki.net/wiki/File:TerrainGuide.png"><code>terrain.png</code></a>-styled texture atlas, and characters are from Oryx's <a href="http://forums.tigsource.com/index.php?topic=8970.0">LOFI 
+Fantasy spritesheets</a>.</p>
+
+<h3>Cube Generation</h3>
+
+<p><img src="img/cubes.png" alt="Figure 3" title="" /></p>
+
+<p><em>Figure 3. Some examples of textured cubes</em></p>
+
+<p>The environment in the game is composed of textured cubes, where each face of a 
+cube is loaded from the texture atlas. Cubes are specified by a 3D array, where 
+the position in the array corresponds to the position of the cube. For example:</p>
+
+<pre><code>cubes[5][0][3] = 4;
+cubes[5][0][4] = 0;
+</code></pre>
+
+<p>means that the cube located at <code>(3,0,5)</code> has textures corresponding to the 4th 
+tile in the texture atlas, and the cube at <code>(4,0,5)</code> is an empty cube (<code>0</code> 
+specifies that nothing is there). </p>
+
+<p>Each cube has six faces, but not all faces will be shown (e.g., if two cubes are 
+right next to each other, the right face of the left cube and the left face of 
+the right cube will never be seen).  When establishing the arrays to bind to the 
+buffers (positions of vertices, texture coordinates, normals, etc), unnecessary 
+faces of the cube are removed to reduce the amount of data that has to be sent 
+to and processed by the GPU. </p>
+
+<h3>Level Generation</h3>
+
+<p><img src="img/dungeon.png" alt="Figure 4" title="" /></p>
+
+<p><em>Figure 4. An example of a randomly generated dungeon</em></p>
+
+<p>Each floor of the dungeon is randomly generated based on a simple <a href="http://kuoi.com/~kamikaze/GameDesign/art07_rogue_dungeon.php">Roguelike 
+dungeon generation algorithm</a>. The entire map is divided into a grid of 
+rooms, with each room being a random size. Rooms are then randomly connected to 
+neighboring rooms until eventually all rooms are connected. Connections 
+(passageways) are made between the centers of each room using a version of 
+<a href="http://en.wikipedia.org/wiki/Bresenham's_line_algorithm">Bresenham's line algorithm</a> with thicker lines. The final result is sent to 
+the cube generation stage and various cube types are chosen for walls and floors 
+based on what level of the dungeon the player is in. </p>
+
+<h3>Characters</h3>
+
+<p><img src="img/billboarding.png" alt="Figure 5" title="" /></p>
+
+<p><em>Figure 5. A billboarded character. Note that the character's orientation 
+remains the same regardless of the camera angle.</em></p>
+
+<p>Characters are randomly chosen from a texture atlas of character sprites. To 
+achieve a 2.5D effect, characters are individually billboarded -- they are 
+always facing the camera. This is done in a separate vertex shader, so the 
+environment is rendered first, the current glsl program is changed, and the 
+characters are then rendered. A description of billboarding implementation can 
+be found on NeHe's "<a href="http://nehe.gamedev.net/article/billboarding_how_to/18011/">Billboarding How To</a>" page.</p>
+
+<!-- Footnotes -->
