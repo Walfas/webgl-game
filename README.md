@@ -5,7 +5,7 @@ directory.
 A playable version can be found at:
 
 * [http://ee.walfas.org/webgl](http://ee.walfas.org/webgl)
-* [http://ee.walfas.org/webgl/iframe.html](http://ee.walfas.org/webgl)
+* [http://ee.walfas.org/webgl/iframe.html](http://ee.walfas.org/webgl/iframe.html)
 
 ###Controls
 

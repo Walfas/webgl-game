@@ -24,7 +24,7 @@ such as Apache HTTP, Apache Tomcat, or nginx can also be used.
 A playable version can also be found at:
 
 * [http://ee.walfas.org/webgl](http://ee.walfas.org/webgl)
-* [http://ee.walfas.org/webgl/iframe.html](http://ee.walfas.org/webgl)
+* [http://ee.walfas.org/webgl/iframe.html](http://ee.walfas.org/webgl/iframe.html)
 
 Gameplay
 ========
